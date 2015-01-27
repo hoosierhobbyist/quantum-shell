@@ -1,0 +1,22 @@
+# See https://atom.io/docs/latest/creating-a-package#menus for more details
+'context-menu':
+  'atom-text-editor': [
+    {
+      'label': 'Toggle quantum-shell'
+      'command': 'quantum-shell:toggle'
+    }
+  ]
+'menu': [
+  {
+    'label': 'Packages'
+    'submenu': [
+      'label': 'quantum-shell'
+      'submenu': [
+        {
+          'label': 'Toggle'
+          'command': 'quantum-shell:toggle'
+        }
+      ]
+    ]
+  }
+]
