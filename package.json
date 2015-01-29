@@ -2,14 +2,14 @@
   "name": "quantum-shell",
   "main": "./lib/quantum-shell",
   "version": "0.0.0",
-  "description": "A short description of your package",
+  "description": "A terminal emulator for the Atom text editor",
   "activationCommands": {
     "atom-workspace": "quantum-shell:toggle"
   },
-  "repository": "https://github.com/atom/quantum-shell",
+  "repository": "https://github.com/sedabull/quantum-shell",
   "license": "MIT",
   "engines": {
-    "atom": ">0.50.0"
+    "atom": ">=0.176.0"
   },
   "dependencies": {
   }

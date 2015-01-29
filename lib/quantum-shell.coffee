@@ -1,33 +1,36 @@
-QuantumShellView = require './quantum-shell-view'
+QuantumShellModel = require './quantum-shell-model'
 {CompositeDisposable} = require 'atom'
 
 module.exports = QuantumShell =
-  quantumShellView: null
-  modalPanel: null
-  subscriptions: null
+    panel: null
+    model: null
+    lastPane: null
+    subscriptions: null
 
-  activate: (state) ->
-    @quantumShellView = new QuantumShellView(state.quantumShellViewState)
-    @modalPanel = atom.workspace.addModalPanel(item: @quantumShellView.getElement(), visible: false)
+    activate: (state) ->
+        @model = new QuantumShellModel(state.quantumShellState)
+        @panel = atom.workspace.addBottomPanel(item: @model, visible: false)
 
-    # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
-    @subscriptions = new CompositeDisposable
+        # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
+        @subscriptions = new CompositeDisposable
 
-    # Register command that toggles this view
-    @subscriptions.add atom.commands.add 'atom-workspace', 'quantum-shell:toggle': => @toggle()
+        # Register command that toggles this view
+        @subscriptions.add atom.commands.add 'atom-workspace', 'quantum-shell:toggle': => @toggle()
 
-  deactivate: ->
-    @modalPanel.destroy()
-    @subscriptions.dispose()
-    @quantumShellView.destroy()
+    deactivate: ->
+        @panel.destroy()
+        @model.destroy()
+        @subscriptions.dispose()
 
-  serialize: ->
-    quantumShellViewState: @quantumShellView.serialize()
+    serialize: ->
+        quantumShellState: @quantumShellModel.serialize()
 
-  toggle: ->
-    console.log 'QuantumShell was toggled!'
-
-    if @modalPanel.isVisible()
-      @modalPanel.hide()
-    else
-      @modalPanel.show()
+    toggle: ->
+        console.log "quantum-shell:toggle"
+        if @panel.isVisible()
+            @panel.hide()
+            @lastPane.activate()
+        else
+            @lastPane = atom.workspace.getActivePane()
+            @panel.show()
+            document.querySelector('#quantum-shell-input').focus()
