@@ -20,7 +20,7 @@ module.exports = (model) ->
     form.appendChild input
     form.appendChild submit
     
-    header.innerHTML = "QUANTUM SHELL #{atom.packages.getLoadedPackage('quantum-shell').metadata.version}"
+    header.innerHTML = "QUANTUM SHELL v-#{atom.packages.getLoadedPackage('quantum-shell').metadata.version}"
     input.placeholder = "#{process.env.USER}@atom:#{process.env.PWD.replace(process.env.HOME, '~')}$"
     submit.innerHTML = 'ENTER'
     output.innerHTML = 
@@ -28,7 +28,8 @@ module.exports = (model) ->
         <em>
         Welcome to Quantum Shell!<br />
         Written by Seth David Bullock (sedabull@gmail.com)<br />
-        github repository: http://github.com/sedabull/quantum-shell<br />
+        Github repository: http://github.com/sedabull/quantum-shell<br />
+        All questions, comments, bug reports, and pull requests are welcome!<br />
         </em>
         '''
     
@@ -36,14 +37,17 @@ module.exports = (model) ->
     submit.type = 'button'
     
     submit.onclick = ->
+        value = input.value
+        input.value = ''
         p = document.createElement 'p'
         p.classList.add 'quantum-shell-command'
-        p.innerHTML = input.value
+        p.innerHTML = value
         output.appendChild p
-        input.value = ''
         output.scrollTop = Infinity
+        model.exec value
     
     model.subscriptions.add atom.commands.add '#quantum-shell-input', 'quantum-shell:submit', -> submit.click()
     model.subscriptions.add atom.commands.add '#quantum-shell-input', 'quantum-shell:backspace', -> input.value = input.value.slice 0, -1
     
-    model.view = main
+    model.output = output
+    return main
