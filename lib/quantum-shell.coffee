@@ -1,18 +1,16 @@
-QuantumShellModel = require './quantum-shell-model'
 {CompositeDisposable} = require 'atom'
+QuantumShellModel = require './quantum-shell-model'
 
-module.exports = QuantumShell =
+module.exports =
     panel: null
     model: null
     lastPane: null
     subscriptions: null
 
     activate: (state) ->
-        @model = new QuantumShellModel(state.quantumShellState)
+        @subscriptions = new CompositeDisposable()
+        @model = new QuantumShellModel(state.modelState)
         @panel = atom.workspace.addBottomPanel(item: @model, visible: false)
-
-        # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
-        @subscriptions = new CompositeDisposable
 
         # Register command that toggles this view
         @subscriptions.add atom.commands.add 'atom-workspace', 'quantum-shell:toggle': => @toggle()
@@ -23,10 +21,9 @@ module.exports = QuantumShell =
         @subscriptions.dispose()
 
     serialize: ->
-        quantumShellState: @quantumShellModel.serialize()
+        modelState: @quantumShellModel.serialize()
 
     toggle: ->
-        console.log "quantum-shell:toggle"
         if @panel.isVisible()
             @panel.hide()
             @lastPane.activate()

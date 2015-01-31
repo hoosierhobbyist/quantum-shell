@@ -1,27 +1,27 @@
+split = require 'split'
+through = require 'through2'
+{Readable} = require 'stream'
 {exec} = require 'child_process'
 {CompositeDisposable} = require 'atom'
-Terminal = require './quantum-shell-terminal'
 QuantumShellView = require './quantum-shell-view'
-LineBuffer = require './quantum-shell-line-buffer'
 
 class QuantumShellModel
-    subscriptions: new CompositeDisposable()
-    
     constructor: (serializeState) ->
-        @dataStream = new LineBuffer
-        @errorStream = new LineBuffer
+        @dataStream = through()
+        @errorStream = through()
+        @subscriptions = new CompositeDisposable()
         
-        @dataStream.on 'line', (line) =>
-            p = document.createElement 'p'
-            p.innerHTML = line + '<br />'
-            p.classList.add 'quantum-shell-data'
-            @output.appendChild p
+        @dataStream.on 'data', (chunk) =>
+            line = document.createElement 'div'
+            line.innerHTML = chunk.toString()
+            line.classList.add 'quantum-shell-data'
+            @output.appendChild line
             @output.scrollTop = Infinity
-        @errorStream.on 'line', (line) =>
-            p = document.createElement 'p'
-            p.innerHTML = line + '<br />'
-            p.classList.add 'quantum-shell-error'
-            @output.appendChild p
+        @errorStream.on 'data', (chunk) =>
+            line = document.createElement 'div'
+            line.innerHTML = chunk.toString()
+            line.classList.add 'quantum-shell-error'
+            @output.appendChild line
             @output.scrollTop = Infinity
         @dataStream.on 'error', (error) ->
             console.log "DATA STREAM ERROR: #{error}"
@@ -38,8 +38,8 @@ class QuantumShellModel
     exec: (input) ->
         child = exec input, cwd: process.PWD, env: process.env
         
-        child.stdout.pipe @dataStream, end: false
-        child.stderr.pipe @errorStream, end: false
+        child.stdout.pipe(split()).pipe @dataStream, end: false
+        child.stderr.pipe(split()).pipe @errorStream, end: false
         child.on 'error', (error) =>
             console.log "EXEC ERROR: #{error}"
             @errorStream.write error

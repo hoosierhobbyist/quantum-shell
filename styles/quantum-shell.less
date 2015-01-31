@@ -4,7 +4,7 @@
 // for a full listing of what's available.
 @import "ui-variables";
 
-.quantum-shell{
+#quantum-shell{
     #quantum-shell-header{
         margin: 0px;
         font-weight: bold;
@@ -29,7 +29,7 @@
         .quantum-shell-data{
             margin: 0px;
             &:before{
-                content: '**';
+                content: '--';
                 color: green;
             }
         }
@@ -41,21 +41,20 @@
             }
         }
     }
-    #quantum-shell-form{
+    #quantum-shell-input{
+        width: 90%;
+        color: #fff;
+        font-size: 1.2em;
         margin-top: 3px;
-        #quantum-shell-input{
-            width: 90%;
-            font-size: 1.2em;
-            background-color: lighten(@app-background-color, 10%);
-            color: #fff;
-        }
-        #quantum-shell-submit{
-            float: right;
-            width: 9.5%;
-            margin-left:.5%;
-            font-size: 1.2em;
-            color: @text-color;
-            background-color: @app-background-color;
-        }
+        background-color: lighten(@app-background-color, 10%);
+    }
+    #quantum-shell-submit{
+        float: right;
+        width: 9.5%;
+        margin-top: 3px;
+        margin-left: .5%;
+        font-size: 1.2em;
+        color: @text-color;
+        background-color: @app-background-color;
     }
 }
