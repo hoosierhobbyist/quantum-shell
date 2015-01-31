@@ -1,11 +1,11 @@
 {
   "name": "quantum-shell",
   "main": "./lib/quantum-shell",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": {
-      "name": "Seth David Bullock",
-      "email": "sedabull@gmail.com",
-      "url": "http://github.com/sedabull"
+    "name": "Seth David Bullock",
+    "email": "sedabull@gmail.com",
+    "url": "http://github.com/sedabull"
   },
   "description": "A terminal emulator for the Atom text editor, inspired by terminal-status and terminal-panel",
   "keywords": [
@@ -15,14 +15,14 @@
   ],
   "bugs": {
     "email": "sedabull@gmail.com",
-    "url": "http://github.com/sedabull/quantum-shell/issues"  
+    "url": "http://github.com/sedabull/quantum-shell/issues"
   },
   "activationCommands": {
     "atom-workspace": "quantum-shell:toggle"
   },
   "repository": {
-      "type": "git",
-      "url": "https://github.com/sedabull/quantum-shell"
+    "type": "git",
+    "url": "https://github.com/sedabull/quantum-shell"
   },
   "license": "MIT",
   "engines": {
