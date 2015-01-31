@@ -9,6 +9,7 @@
   },
   "description": "A terminal emulator for the Atom text editor, inspired by terminal-status and terminal-panel",
   "keywords": [
+    "cli",
     "terminal",
     "command line",
     "1.0.0-pre API compatiable"
