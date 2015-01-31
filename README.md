@@ -1,4 +1,4 @@
-# quantum-shell Github's Atom Text Editor
+# Quantum Shell for Github's Atom Text Editor
 A command line interface built directly into Atom! This package is largely inspired
 by (but not a direct fork of) [terminal-panel](http://github.com/thedaniel/terminal-panel).
 The goal of this project is to provide users with a simple, yet powerful tool, that
