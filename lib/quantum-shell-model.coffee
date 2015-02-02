@@ -22,7 +22,7 @@ bash_builtins =
     '''.replace /\s+/g, '$|^'
 other_builtins =
     '''
-    history
+    clear history
     '''.replace /\s+/g, '$|^'
 
 _builtins = RegExp '(^' + sh_builtins + '$|^' + bash_builtins + '$|^' + other_builtins + '$)'
@@ -68,6 +68,48 @@ class QuantumShellModel
             console.log "QUANTUM SHELL DATA STREAM ERROR: #{error}"
         @errorStream.on 'error', (error) ->
             console.log "QUANTUM SHELL ERROR STREAM ERROR: #{error}"
+        
+        #event subscriptions
+        @subscriptions.add atom.commands.add(
+            '#quantum-shell'
+            'quantum-shell:kill-process'
+            => @child.kill() if @child?
+        )#end kill-process command
+        @subscriptions.add atom.commands.add(
+            '#quantum-shell-input'
+            'quantum-shell:submit'
+            => @view.querySelector('#quantum-shell-submit').click()
+        )#end submit command
+        @subscriptions.add atom.commands.add(
+            '#quantum-shell-input'
+            'quantum-shell:backspace'
+            => (ref = @view.querySelector('#quantum-shell-input').value) = ref.slice 0, -1
+        )#end backspace command
+        @subscriptions.add atom.commands.add(
+            '#quantum-shell-input'
+            'quantum-shell:history-back'
+            => 
+                if @history.pos?
+                    if @history.pos == -1
+                        @history.temp = @input.value
+                        @history.pos = 0
+                    if @history.pos < @history.length
+                        @input.value = @history[@history.pos]
+                        @history.pos += 1
+        )#end history-back command
+        @subscriptions.add atom.commands.add(
+            '#quantum-shell-input'
+            'quantum-shell:history-forward'
+            =>
+                if @history.pos?
+                    if @history.pos > 0
+                        @history.pos -= 1
+                        @input.value = @history[@history.pos]
+                    else if @history.pos is 0
+                        @history.pos = -1
+                        @input.value = @history.temp
+                        @history.temp = ''
+        )#end history-forward command
     
     serialize: ->
         delete histroy.pos
@@ -86,6 +128,9 @@ class QuantumShellModel
         subscriptions.dispose()
     
     process: (input) ->
+        #cache input/output references
+        @input ?= @view.querySelector '#quantum-shell-input'
+        @output ?= @view.querySelector '#quantum-shell-output'
         #adjust the history queue
         @history.pos = -1
         @history.temp = ''
