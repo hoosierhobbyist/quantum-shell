@@ -45,7 +45,7 @@ class QuantumShellModel
         #state attributes
         @aliases = state.aliases or {}
         @history = state.history or []
-        @env = Object.create null
+        @env = new Object process.env
         @lwd = state.lwd or ''
         @pwd = state.pwd or atom.project.path or @home
         
@@ -73,7 +73,10 @@ class QuantumShellModel
         @subscriptions.add atom.commands.add(
             '#quantum-shell'
             'quantum-shell:kill-process'
-            => @child.kill() if @child?
+            => 
+                if @child?
+                    @child.kill()
+                    @child = null
         )#end kill-process command
         @subscriptions.add atom.commands.add(
             '#quantum-shell-input'
@@ -90,10 +93,15 @@ class QuantumShellModel
             'quantum-shell:history-back'
             => 
                 if @history.pos?
+                    if @history.dir is 'forward'
+                        @history.dir = 'back'
+                        @history.pos += 1
                     if @history.pos == -1
+                        @history.dir = 'back'
                         @history.temp = @input.value
                         @history.pos = 0
                     if @history.pos < @history.length
+                        @history.dir = 'back'
                         @input.value = @history[@history.pos]
                         @history.pos += 1
         )#end history-back command
@@ -102,18 +110,24 @@ class QuantumShellModel
             'quantum-shell:history-forward'
             =>
                 if @history.pos?
+                    if @history.dir is 'back'
+                        @history.dir = 'forward'
+                        @history.pos -= 1
                     if @history.pos > 0
+                        @history.dir = 'forward'
                         @history.pos -= 1
                         @input.value = @history[@history.pos]
                     else if @history.pos is 0
+                        @history.dir = ''
                         @history.pos = -1
                         @input.value = @history.temp
                         @history.temp = ''
         )#end history-forward command
     
     serialize: ->
-        delete histroy.pos
-        delete history.temp
+        delete @histroy.pos
+        delete @history.dir
+        delete @history.temp
         
         pwd: @pwd
         lwd: @lwd
@@ -133,25 +147,28 @@ class QuantumShellModel
         @output ?= @view.querySelector '#quantum-shell-output'
         #adjust the history queue
         @history.pos = -1
+        @history.dir = ''
         @history.temp = ''
         unless input is @history[0]
             unless @history.unshift(input) <= @maxHistory
                 @history.pop()
         #builtin lookup
         if builtin = input.split(/\s+/)[0].match(_builtins)
-            if @['_' + builtin[0]]?.call?
-                @['_' + builtin[0]].call this, input
+            builtin = builtin[0]
+            if @['_' + builtin]?.call?
+                @['_' + builtin].call this, input
             else
-                @errorStream.write "quantum-shell builtin: [#{builtin[0]}] has yet to be implemented"
+                @errorStream.write "quantum-shell builtin: [#{builtin}] has yet to be implemented"
                 @errorStream.write "For more information please see the relevant issue <a href='http://github.com/sedabull/quantum-shell/issues/1'>here</a>"
-        #execute command normally
+        #pass command to os
         else
             @exec input
     
     exec: (input) ->
+        #prevent spawning new child while one is running
         unless @child
             #new ChildProcess instance
-            @child = exec input, cwd: @pwd, env: process.env
+            @child = exec input, cwd: @pwd, env: @env
             #pipe newline seperated output back to the user
             @child.stdout.pipe(split()).pipe @dataStream, end: false
             @child.stderr.pipe(split()).pipe @errorStream, end: false
@@ -180,7 +197,7 @@ class QuantumShellModel
         if tokens.length is 1
             @lwd = @pwd
             @pwd = @home
-            @input.placeholder = "#{@user}@atom:~"
+            @input.placeholder = "#{@user}@atom:~$"
         else if tokens[1] is '-'
             [@pwd, @lwd] = [@lwd, @pwd]
             @input.placeholder = "#{@user}@atom:#{@pwd.replace @home, '~'}$"
@@ -188,15 +205,15 @@ class QuantumShellModel
             @errorStream.write "quantum-shell: cd: invalid option"
         else
             newPWD = path.resolve @pwd, tokens[1].replace '~', @home
-            fs.exists newPWD, (exists) =>
-                if exists
+            fs.exists newPWD, (itExists) =>
+                if itExists
                     fs.stat newPWD, (error, stats) =>
                         if error
                             console.log "QUANTUM SHELL CD ERROR: #{error}"
                         else
                             if stats.isDirectory()
                                 try
-                                    exec 'ls', cwd: newPWD, env: process.env
+                                    exec 'ls', cwd: newPWD, env: @env
                                     @lwd = @pwd
                                     @pwd = newPWD
                                     @input.placeholder = "#{@user}@atom:#{@pwd.replace @home, '~'}$"
