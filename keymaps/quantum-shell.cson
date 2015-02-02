@@ -18,3 +18,7 @@
   'backspace': 'quantum-shell:backspace'
   'up': 'quantum-shell:history-back'
   'down': 'quantum-shell:history-forward'
+  #'left': 'native!'
+  #'right': 'native!'
+  #'backspace': 'native!'
+  #'shift-backspace': 'native!'
