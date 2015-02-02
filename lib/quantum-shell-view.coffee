@@ -1,3 +1,5 @@
+{Disposable} = require 'atom'
+
 module.exports = (model) ->
     main = document.createElement 'div'
     header = document.createElement 'h1'
@@ -38,5 +40,7 @@ module.exports = (model) ->
         output.scrollTop = Infinity
         model.process input.value
         input.value = ''
+    model.subscriptions.add new Disposable ->
+        submit.onclick = null
     
     return model.view = main
