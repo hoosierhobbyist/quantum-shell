@@ -9,6 +9,23 @@ through = require 'through2'
 {CompositeDisposable} = require 'atom'
 QuantumShellView = require './quantum-shell-view'
 
+#builtin commands
+sh_builtins = 
+    '''
+    : . break cd continue eval exec exit export getopts hash
+    pwd readonly return shift test times trap umask unset
+    '''.replace /\s+/g, '$|^'
+
+bash_builtins =
+    '''
+    alias bind builtin caller command declare echo enable help let local
+    logout mapfile printf read readarray source type typeset ulimit unalias
+    '''.replace /\s+/g, '$|^'
+
+_builtins = RegExp '(^' + sh_builtins + '$|^' + bash_builtins + '$)'
+console.log _builtins
+
+#primary model class
 class QuantumShellModel
     #class attributes
     maxHistory: 100
@@ -66,18 +83,13 @@ class QuantumShellModel
         unless input is @history[0]
             unless @history.unshift(input) <= @maxHistory
                 @history.pop()
-        #change directory logic
-        if input.match /^cd\s+/
-            newPWD = path.resolve @pwd, input.split(/\s+/)[1]
-            fs.stat newPWD, (error, stats) =>
-                if error
-                    console.log "fs.stat error in quantum-shell cd program: #{error}"
-                else
-                    if stats.isDirectory()
-                        @pwd = newPWD
-                        @input.placeholder = "#{@user}@atom:#{@pwd.replace @home, '~'}$"
-                    else
-                        @errorStream.write "cd error: #{input.split(/\s+/)[1]} is not a directory"
+        #builtin lookup
+        if builtin = input.split(/\s+/)[0].match _builtins
+            if @[builtin[0]]?.call?
+                @[builtin[0]].call this, input
+            else
+                @errorStream.write "quantum-shell builtin: [#{builtin[0]}] has yet to be implemented"
+                @errorStream.write "For more information see the relevant issue <a href='http://github.com/sedabull/quantum-shell/issues/1'>here</a>"
         #execute command normally
         else
             @exec input
@@ -100,7 +112,22 @@ class QuantumShellModel
                 @child = null
                 console.log "EXEC EXIT CODE: #{code}"
                 console.log "EXEC EXIT SIGNAL: #{signal}"
-
+    
+    #builtins
+    ###
+    cd: (input) ->
+        if input.match /^cd\s+/
+            newPWD = path.resolve @pwd, input.split(/\s+/)[1]
+            fs.stat newPWD, (error, stats) =>
+                if error
+                    console.log "fs.stat error in quantum-shell cd program: #{error}"
+                else
+                    if stats.isDirectory()
+                        @pwd = newPWD
+                        @input.placeholder = "#{@user}@atom:#{@pwd.replace @home, '~'}$"
+                    else
+                        @errorStream.write "cd error: #{input.split(/\s+/)[1]} is not a directory"
+    ###
 atom.views.addViewProvider QuantumShellModel, QuantumShellView
 
 module.exports = QuantumShellModel

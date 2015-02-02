@@ -1,3 +1,6 @@
+## 0.2.0 - Initial work on builtins
+* Print error when trying to use unimplemented builtin with link to issue
+
 ## 0.1.0 - First Release
 * Basic functionality using child_process.exec
 * Suitable for commands that are only concerned with output
