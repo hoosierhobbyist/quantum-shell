@@ -46,8 +46,9 @@ class QuantumShellModel
         @history = state.history or []
         @lwd = state.lwd or ''
         @pwd = state.pwd or atom.project.path or @home
-        @env = Object.create null
-        @env[k] = v for own k, v of process.env
+        @env = state.env or Object.create null
+        unless state.env?
+            @env[k] = v for own k, v of process.env
         
         #return output to the user
         @dataStream.on 'data', (chunk) =>
@@ -120,10 +121,6 @@ class QuantumShellModel
         )#end history-forward command
     
     serialize: ->
-        delete @histroy.pos
-        delete @history.dir
-        delete @history.temp
-        
         pwd: @pwd
         lwd: @lwd
         env: @env
@@ -182,11 +179,12 @@ class QuantumShellModel
                 @child = null
                 for line in error.toString().split /\r?\n/
                     @errorStream.write line
-            #log exit code and signal
+            #signal that another child can now be created
             @child.on 'exit', (code, signal) =>
                 @child = null
-                console.log "QUANTUM SHELL EXIT CODE: #{code}"
-                console.log "QUANTUM SHELL EXIT SIGNAL: #{signal}"
+                if atom.inDevMode()
+                    console.log "QUANTUM SHELL EXIT CODE: #{code}"
+                    console.log "QUANTUM SHELL EXIT SIGNAL: #{signal}"
     
     #builtins
     _pwd: -> @dataStream.write @pwd
@@ -243,11 +241,32 @@ class QuantumShellModel
                                 @errorStream.write "quantum-shell: cd: #{tokens[1]} is not a directory"
                 else
                     @errorStream.write "quantum-shell: cd: no such file or directory"
+    _export: (input) ->
+        #TODO
     _alias: (input) ->
         tokens = input.split /\s+/
-        for token, i in tokens when i isnt 0
-            
+        if tokens.length is 1
+            for own key, expansion of @aliases
+                @dataStream.write "#{key}='#{expansion}'"
+        else if tokens.length is 2
+            if @aliases[tokens[1]]
+                @dataStream.write @aliases[tokens[1]]
+            else
+                @errorStream.write "quantum-shell: alias: #{tokens[1]} no such alias"
+        else
+            if tokens[1].match / =$/
+                key = tokens[1].slice 0, -1
+                expansion = tokens.slice(2).join(' ')
+                @aliases[key] = expansion
+            else
+                @errorStream.write "quantum-shell: alias: missing '=' after alias name"
     _unalias: (input) ->
+        tokens = input.split /\s+/
+        for token in tokens.slice(1)
+            if @aliases[token]?
+                delete @aliases[token]
+            else
+                @errorStream.write "quantum-shell: unalias: #{token} no such alias"
 #register view provider
 atom.views.addViewProvider QuantumShellModel, QuantumShellView
 
