@@ -1,5 +1,15 @@
 ## 0.2.0 - Initial work on builtins
+* `cd` builtin
+* `pwd` builtin
+* `echo` builtin
+* `clear` builtin
+* `history` builtin
+* `printenv` builtin
+* `alias` builtin
+* `unalias` builtin
 * Print error when trying to use unimplemented builtin with link to issue
+* Goals for next release:
+    * `atom` builtin to execute any registered atom command
 
 ## 0.1.0 - First Release
 * Basic functionality using child_process.exec

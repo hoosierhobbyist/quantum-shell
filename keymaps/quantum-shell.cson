@@ -15,10 +15,10 @@
 
 '#quantum-shell-input':
   'enter': 'quantum-shell:submit'
-  'backspace': 'quantum-shell:backspace'
+  #'backspace': 'quantum-shell:backspace'
   'up': 'quantum-shell:history-back'
   'down': 'quantum-shell:history-forward'
-  #'left': 'native!'
-  #'right': 'native!'
-  #'backspace': 'native!'
-  #'shift-backspace': 'native!'
+  'left': 'native!'
+  'right': 'native!'
+  'backspace': 'native!'
+  'shift-backspace': 'native!'

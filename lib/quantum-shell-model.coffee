@@ -22,11 +22,10 @@ bash_builtins =
     '''.replace /\s+/g, '$|^'
 other_builtins =
     '''
-    clear history
+    clear history printenv
     '''.replace /\s+/g, '$|^'
 
 _builtins = RegExp '(^' + sh_builtins + '$|^' + bash_builtins + '$|^' + other_builtins + '$)'
-console.log _builtins
 
 #primary model class
 class QuantumShellModel
@@ -45,9 +44,10 @@ class QuantumShellModel
         #state attributes
         @aliases = state.aliases or {}
         @history = state.history or []
-        @env = new Object process.env
         @lwd = state.lwd or ''
         @pwd = state.pwd or atom.project.path or @home
+        @env = Object.create null
+        @env[k] = v for own k, v of process.env
         
         #return output to the user
         @dataStream.on 'data', (chunk) =>
@@ -83,11 +83,6 @@ class QuantumShellModel
             'quantum-shell:submit'
             => @view.querySelector('#quantum-shell-submit').click()
         )#end submit command
-        @subscriptions.add atom.commands.add(
-            '#quantum-shell-input'
-            'quantum-shell:backspace'
-            => (ref = @view.querySelector('#quantum-shell-input').value) = ref.slice 0, -1
-        )#end backspace command
         @subscriptions.add atom.commands.add(
             '#quantum-shell-input'
             'quantum-shell:history-back'
@@ -145,6 +140,13 @@ class QuantumShellModel
         #cache input/output references
         @input ?= @view.querySelector '#quantum-shell-input'
         @output ?= @view.querySelector '#quantum-shell-output'
+        
+        #expand aliases/environment variables
+        for own key, expansion of @aliases
+            input = input.replace key, expansion
+        while enVar = input.match /\$\w+/
+            input = input.replace enVar[0], @env[enVar[0].slice(1)]
+        
         #adjust the history queue
         @history.pos = -1
         @history.dir = ''
@@ -152,6 +154,7 @@ class QuantumShellModel
         unless input is @history[0]
             unless @history.unshift(input) <= @maxHistory
                 @history.pop()
+        
         #builtin lookup
         if builtin = input.split(/\s+/)[0].match(_builtins)
             builtin = builtin[0]
@@ -160,6 +163,7 @@ class QuantumShellModel
             else
                 @errorStream.write "quantum-shell builtin: [#{builtin}] has yet to be implemented"
                 @errorStream.write "For more information please see the relevant issue <a href='http://github.com/sedabull/quantum-shell/issues/1'>here</a>"
+        
         #pass command to os
         else
             @exec input
@@ -187,10 +191,23 @@ class QuantumShellModel
     #builtins
     _pwd: -> @dataStream.write @pwd
     _echo: (input) -> @dataStream.write input.slice 5
+    _clear: ->
+        while element = @output.firstChild
+            @output.removeChild element
+        return
     _history: ->
         for line, i in @history.reverse() when i < @history.length - 1
             @dataStream.write "#{i}: #{line}"
         @history.reverse()
+    _printenv: (input) ->
+        tokens = input.split /\s+/
+        if tokens.length is 1
+            for own key, value of @env
+                @dataStream.write "#{key}=#{value}"
+        else
+            if @env[tokens[1]]?
+                @dataStream.write @env[tokens[1]]
+        return
     _cd: (input) ->
         tokens = input.split(/\s+/)
         
@@ -226,7 +243,11 @@ class QuantumShellModel
                                 @errorStream.write "quantum-shell: cd: #{tokens[1]} is not a directory"
                 else
                     @errorStream.write "quantum-shell: cd: no such file or directory"
-
+    _alias: (input) ->
+        tokens = input.split /\s+/
+        for token, i in tokens when i isnt 0
+            
+    _unalias: (input) ->
 #register view provider
 atom.views.addViewProvider QuantumShellModel, QuantumShellView
 
