@@ -23,10 +23,10 @@ module.exports = (model) ->
     submit.innerHTML = 'ENTER'
     output.innerHTML = 
         '''
-        <em>Welcome to Quantum Shell!
+        <div class='text-info'><em>Welcome to Quantum Shell!
+        Github repository: <a href='http://github.com/sedabull/quantum-shell'>sedabull/quantum-shell</a>
         Written by Seth David Bullock (sedabull@gmail.com)
-        Github repository: http://github.com/sedabull/quantum-shell
-        All questions, comments, bug reports, and pull requests are welcome!</em>
+        All questions, comments, bug reports, and pull requests are welcome!</em></div>
         '''
     
     input.type = 'text'
@@ -34,6 +34,7 @@ module.exports = (model) ->
     
     submit.onclick = ->
         cmd = document.createElement 'div'
+        cmd.classList.add 'text-info'
         cmd.classList.add 'quantum-shell-command'
         cmd.innerHTML = input.value
         output.appendChild cmd

@@ -5,59 +5,69 @@
 @import "ui-variables";
 
 #quantum-shell{
+    font-family: @font-family;
+    border: 3px groove @base-border-color;
+    background-color: @base-background-color;
     #quantum-shell-header{
         margin: 0px;
         font-weight: bold;
         text-align: center;
-        padding: 3px 0px;
+        color: @text-color-highlight;
+        border-radius: @component-border-radius;
+        border: 3px groove @panel-heading-border-color;
+        background-color: @panel-heading-background-color;
     }
     #quantum-shell-output{
+        margin: 0px;
+        padding: 0px 3px;
         min-height: 25px;
         max-height: 250px;
-        padding: 3px 5px;
         overflow-y: scroll;
-        font-size: 1.2em;
-        border: 3px groove;
+        font-size: @font-size;
         font-family: monospace;
+        border-radius: @component-border-radius;
+        border: 3px groove @inset-panel-border-color;
+        background-color: @inset-panel-background-color;
         .quantum-shell-command{
-            margin: 0px;
             &:before{
                 content: '$>';
-                color: green;
-                font-weight: 500;
             }
         }
         .quantum-shell-data{
-            margin: 0px;
             &:before{
-                content: '--';
-                color: green;
+                content: '~~';
             }
         }
         .quantum-shell-error{
-            margin: 0px;
-            color: brightorange;
-            background-color: darkred;
             &:before{
                 content: '!!';
-                color: red;
             }
         }
     }
+    ::-webkit-input-placeholder{
+        color: @text-color-subtle;
+    }
     #quantum-shell-input{
         width: 90%;
-        color: #fff;
-        font-size: 1.2em;
-        margin-top: 3px;
-        background-color: lighten(@app-background-color, 10%);
+        color: @text-color;
+        font-size: @font-size * 1.2;
+        border-color: @input-border-color;
+        border-radius: @component-border-radius;
+        background-color: @input-background-color;
     }
     #quantum-shell-submit{
+        width: 10%;
         float: right;
-        width: 9.5%;
-        margin-top: 3px;
-        margin-left: .5%;
-        font-size: 1.2em;
         color: @text-color;
-        background-color: @app-background-color;
+        font-size: @font-size * 1.2;
+        border-color: @button-border-color;
+        border-radius: @component-border-radius;
+        background-color: @button-background-color;
+        &:hover{
+            background-color: @button-background-color-hover;
+        }
+        &:active{
+            background-color: @button-background-color-selected;
+        }
     }
 }

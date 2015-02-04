@@ -12,7 +12,7 @@ QuantumShellView = require './quantum-shell-view'
 #builtin commands
 sh_builtins = 
     '''
-    : . break cd continue eval exec exit export getopts hash
+    : \\. break cd continue eval exec exit export getopts hash
     pwd readonly return shift test times trap umask unset
     '''.replace /\s+/g, '$|^'
 bash_builtins =
@@ -54,12 +54,14 @@ class QuantumShellModel
         @dataStream.on 'data', (chunk) =>
             line = document.createElement 'div'
             line.innerHTML = chunk.toString()
+            line.classList.add 'text-success'
             line.classList.add 'quantum-shell-data'
             @output.appendChild line
             @output.scrollTop = Infinity
         @errorStream.on 'data', (chunk) =>
             line = document.createElement 'div'
             line.innerHTML = chunk.toString()
+            line.classList.add 'text-error'
             line.classList.add 'quantum-shell-error'
             @output.appendChild line
             @output.scrollTop = Infinity
@@ -158,8 +160,8 @@ class QuantumShellModel
             if @['_' + builtin]?.call?
                 @['_' + builtin].call this, input
             else
-                @errorStream.write "quantum-shell builtin: [#{builtin}] has yet to be implemented"
-                @errorStream.write "For more information please see the relevant issue <a href='http://github.com/sedabull/quantum-shell/issues/1'>here</a>"
+                @errorStream.write "quantum-shell: builtin: [#{builtin}] has yet to be implemented"
+                @errorStream.write "For more information please see the relevant issue <a class='text-warning' href='http://github.com/sedabull/quantum-shell/issues/1'>here</a>"
         
         #pass command to os
         else
@@ -242,7 +244,16 @@ class QuantumShellModel
                 else
                     @errorStream.write "quantum-shell: cd: no such file or directory"
     _export: (input) ->
-        #TODO
+        tokens = input.split /\s+/
+        if tokens.length is 1
+            @_printenv input
+        else if tokens.length > 2
+            if tokens[2] is '='
+                enVar = tokens[1]
+                value = tokens.slice(3).join(' ')
+                @env[enVar] = value
+            else
+                @errorStream.write "quantum-shell: export: missing '=' after environment variable name"
     _alias: (input) ->
         tokens = input.split /\s+/
         if tokens.length is 1
@@ -254,13 +265,15 @@ class QuantumShellModel
             else
                 @errorStream.write "quantum-shell: alias: #{tokens[1]} no such alias"
         else
-            if tokens[1].match / =$/
-                key = tokens[1].slice 0, -1
-                expansion = tokens.slice(2).join(' ')
+            if tokens[2] is '='
+                key = tokens[1]
+                expansion = tokens.slice(3).join(' ')
                 @aliases[key] = expansion
             else
                 @errorStream.write "quantum-shell: alias: missing '=' after alias name"
     _unalias: (input) ->
+        for own key, expansion of @aliases
+            input = input.replace expansion, key
         tokens = input.split /\s+/
         for token in tokens.slice(1)
             if @aliases[token]?
