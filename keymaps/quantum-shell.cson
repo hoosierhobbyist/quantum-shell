@@ -10,6 +10,14 @@
 'atom-workspace':
   'ctrl-shift-q': 'quantum-shell:toggle'
 
+'#quantum-shell':
+  'ctrl-c': 'quantum-shell:kill-process'
+
 '#quantum-shell-input':
   'enter': 'quantum-shell:submit'
-  'backspace': 'quantum-shell:backspace'
+  'up': 'quantum-shell:history-back'
+  'down': 'quantum-shell:history-forward'
+  'left': 'native!'
+  'right': 'native!'
+  'backspace': 'native!'
+  'shift-backspace': 'native!'
