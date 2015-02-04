@@ -8,4 +8,4 @@ package should run as expected on Atom >=0.174.0 with any standard Linux machine
 compatibility is an eventual goal as are many other things (see the CHANGELOG for details).
 To get started just search for and download 'quantum-shell' in the Atom package manager and press `ctrl-shift-q` to get started. Happy Hacking!
 
-![A screenshot of your package](https://f.cloud.github.com/assets/69169/2290250/c35d867a-a017-11e3-86be-cd7c5bf3ff9b.gif)
+![light](https://github.com/sedabull/quantum-shell/resources)
