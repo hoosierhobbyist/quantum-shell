@@ -3,6 +3,7 @@
 * `pwd` builtin
 * `echo` builtin
 * `clear` builtin
+* `export` builtin
 * `alias` builtin
 * `unalias` builtin
 * `history` builtin
