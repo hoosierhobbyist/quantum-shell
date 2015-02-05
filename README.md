@@ -6,11 +6,25 @@ The initial release of quantum-shell did not allow a user to change directories 
 ### Full `history` support just like you're used to in bash
 Just use the `up` and `down` arrow keys when the input field is focused to quickly navigate through your history. Or use the `history` builtin to view a list of your past 100 commands.
 ### Full `alias` and `unalias` support
-For the sake of simplicity of implementation, the syntax is a little different in quantum-shell than other shells. The syntax is:`alias <key> = <expansion>`.
+For the sake of simplicity of implementation, the syntax is a little different in quantum-shell than other shells. The syntax is:
+```
+alias <key> = <expansion>
+```
 
-There are a few things to know about this syntax. First, the `key` must be a single word, with absolutely no whitespace. Second, the `=` must have whitespace on either side of it (i.e. not touching anything). And finally, all of the words to the left of the `=` will be concatenated together and seperated by a single `space`. Whenever quantum-shell detects the `key` in an input command, it will be replaced with `expansion`. A common and useful example would be `alias ll = ls -l`.
+There are a few things to know about this syntax. First, the `key` must be a single word, with absolutely no whitespace. Second, the `=` must have whitespace on either side of it (i.e. not touching anything). And finally, all of the words to the left of the `=` will be concatenated together and seperated by a single `space`. Whenever quantum-shell detects the `key` in an input command, it will be replaced with `expansion`. A common and useful example would be 
+```
+alias ll = ls -l
+```
 ### Full `env` support
-Any word prefixed with a `$` will be interpreted by quantum-shell as an environment variable and replaced with the appropriate value. What this means is that the command `echo $PATH` should return something like `/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin`. In addition, the entire environment can be viewed at once with the builtin command `printenv`. You can even add to the environment using the `export` command. The syntax for this command is exactly the same as `alias` (see above).
+Any word prefixed with a `$` will be interpreted by quantum-shell as an environment variable and replaced with the appropriate value. What this means is that the command 
+```
+echo $PATH
+```
+should return something like 
+```
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+```
+In addition, the entire environment can be viewed at once with the builtin command `printenv`. You can even add to the environment using the `export` command. The syntax for this command is exactly the same as `alias` (see above).
 ### Looks Good in any Theme!
 ![light](https://raw.githubusercontent.com/sedabull/quantum-shell/master/resources/quantum-shell-light.png)
 

@@ -3,10 +3,12 @@
 * `pwd` builtin
 * `echo` builtin
 * `clear` builtin
+* `export` builtin
 * `alias` builtin
 * `unalias` builtin
 * `history` builtin
 * `printenv` builtin
+* Add `ctrl-c` key binding to kill a long running process
 * Use `native!` directive for relevant `#quantum-shell-input` commands
 * Print error when trying to use unimplemented builtin with link to issue
 * Use proper ui-variables to make quantum-shell fit well with any ui-theme

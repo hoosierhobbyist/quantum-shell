@@ -22,7 +22,7 @@ bash_builtins =
     '''.replace /\s+/g, '$|^'
 other_builtins =
     '''
-    clear history printenv
+    atom clear history printenv
     '''.replace /\s+/g, '$|^'
 
 _builtins = RegExp '(^' + sh_builtins + '$|^' + bash_builtins + '$|^' + other_builtins + '$)'
@@ -49,6 +49,7 @@ class QuantumShellModel
         @env = state.env or Object.create null
         unless state.env?
             @env[k] = v for own k, v of process.env
+            #@env.SUDO_ASKPASS = '/usr/bin/gksudo'
         
         #return output to the user
         @dataStream.on 'data', (chunk) =>
@@ -280,6 +281,15 @@ class QuantumShellModel
                 delete @aliases[token]
             else
                 @errorStream.write "quantum-shell: unalias: #{token} no such alias"
+    
+    #special builtins
+    _atom: (input) ->
+        tokens = input.split /\s+/
+        if tokens.length > 1
+            if tokens.length < 3
+                atom.commands.dispatch document.querySelector('atom-workspace'), tokens[1]
+            else
+                atom.commands.dispatch document.querySelector(tokens[1]), tokens[2]
 #register view provider
 atom.views.addViewProvider QuantumShellModel, QuantumShellView
 
