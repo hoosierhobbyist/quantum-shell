@@ -131,21 +131,15 @@ class QuantumShellModel
         aliases: @aliases
     
     destroy: ->
-        @child.kill() if @child?
+        @child?.kill()
         @dataStream.end()
         @errorStream.end()
-        subscriptions.dispose()
+        @subscriptions.dispose()
     
     process: (input) ->
         #cache input/output references
         @input ?= @view.querySelector '#quantum-shell-input'
         @output ?= @view.querySelector '#quantum-shell-output'
-        
-        #expand aliases/environment variables
-        for own key, expansion of @aliases
-            input = input.replace key, expansion
-        while enVar = input.match /\$\w+/
-            input = input.replace enVar[0], @env[enVar[0].slice(1)]
         
         #adjust the history queue
         @history.pos = -1
@@ -154,6 +148,12 @@ class QuantumShellModel
         unless input is @history[0]
             unless @history.unshift(input) <= @maxHistory
                 @history.pop()
+        
+        #expand aliases/environment variables
+        for own key, expansion of @aliases
+            input = input.replace key, expansion
+        while enVar = input.match /\$\w+/
+            input = input.replace enVar[0], @env[enVar[0].slice(1)]
         
         #builtin lookup
         if builtin = input.split(/\s+/)[0].match(_builtins)
@@ -204,7 +204,7 @@ class QuantumShellModel
         tokens = input.split /\s+/
         if tokens.length is 1
             for own key, value of @env
-                @dataStream.write "#{key}=#{value}"
+                @dataStream.write "#{key} = #{value}"
         else
             if @env[tokens[1]]?
                 @dataStream.write @env[tokens[1]]
@@ -259,7 +259,7 @@ class QuantumShellModel
         tokens = input.split /\s+/
         if tokens.length is 1
             for own key, expansion of @aliases
-                @dataStream.write "#{key}='#{expansion}'"
+                @dataStream.write "#{key} = #{expansion}"
         else if tokens.length is 2
             if @aliases[tokens[1]]
                 @dataStream.write @aliases[tokens[1]]
@@ -290,7 +290,6 @@ class QuantumShellModel
                 atom.commands.dispatch document.querySelector('atom-workspace'), tokens[1]
             else
                 atom.commands.dispatch document.querySelector(tokens[1]), tokens[2]
-#register view provider
-atom.views.addViewProvider QuantumShellModel, QuantumShellView
-
+#export and register view provider
 module.exports = QuantumShellModel
+atom.views.addViewProvider QuantumShellModel, QuantumShellView
