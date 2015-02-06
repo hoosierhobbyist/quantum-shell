@@ -13,10 +13,10 @@ describe "QuantumShell", ->
     activationPromise = atom.packages.activatePackage('quantum-shell')
 
   describe "when the quantum-shell:toggle event is triggered", ->
-    it "hides and shows the modal panel", ->
+    it "hides and shows the bottom panel", ->
       # Before the activation event the view is not on the DOM, and no panel
       # has been created
-      expect(workspaceElement.querySelector('.quantum-shell')).not.toExist()
+      expect(workspaceElement.querySelector('#quantum-shell')).not.toExist()
 
       # This is an activation event, triggering it will cause the package to be
       # activated.
@@ -26,9 +26,9 @@ describe "QuantumShell", ->
         activationPromise
 
       runs ->
-        expect(workspaceElement.querySelector('.quantum-shell')).toExist()
+        expect(workspaceElement.querySelector('#quantum-shell')).toExist()
 
-        quantumShellElement = workspaceElement.querySelector('.quantum-shell')
+        quantumShellElement = workspaceElement.querySelector('#quantum-shell')
         expect(quantumShellElement).toExist()
 
         quantumShellPanel = atom.workspace.panelForItem(quantumShellElement)
@@ -45,7 +45,7 @@ describe "QuantumShell", ->
       # workspaceElement to the DOM are generally slower than those off DOM.
       jasmine.attachToDOM(workspaceElement)
 
-      expect(workspaceElement.querySelector('.quantum-shell')).not.toExist()
+      expect(workspaceElement.querySelector('#quantum-shell')).not.toExist()
 
       # This is an activation event, triggering it causes the package to be
       # activated.
@@ -56,7 +56,7 @@ describe "QuantumShell", ->
 
       runs ->
         # Now we can test for view visibility
-        quantumShellElement = workspaceElement.querySelector('.quantum-shell')
+        quantumShellElement = workspaceElement.querySelector('#quantum-shell')
         expect(quantumShellElement).toBeVisible()
         atom.commands.dispatch workspaceElement, 'quantum-shell:toggle'
         expect(quantumShellElement).not.toBeVisible()
