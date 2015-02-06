@@ -6,7 +6,6 @@
       'command': 'quantum-shell:kill-process'
     }
   ]
-###
 'menu': [
   {
     'label': 'Packages'
@@ -21,4 +20,3 @@
     ]
   }
 ]
-###

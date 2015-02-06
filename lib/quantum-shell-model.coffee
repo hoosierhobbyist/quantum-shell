@@ -287,9 +287,20 @@ class QuantumShellModel
         tokens = input.split /\s+/
         if tokens.length > 1
             if tokens.length < 3
-                atom.commands.dispatch document.querySelector('atom-workspace'), tokens[1]
+                command = tokens[1]
+                selector = 'atom-workspace'
             else
-                atom.commands.dispatch document.querySelector(tokens[1]), tokens[2]
-#export and register view provider
+                command = tokens[2]
+                selector = tokens[1]
+            
+            if target = document.querySelector selector
+                if atom.commands.dispatch target, command
+                    setTimeout (=> @input.focus()), 100
+                    @dataStream.write "quantum-shell: atom: command '#{command}' was dispatched to target '#{selector}'"
+                else
+                    @errorStream.write "quantum-shell: atom: '#{command}' is not a valid command at target '#{selector}'"
+            else
+                @errorStream.write "quantum-shell: atom: '#{selector}' is not a valid target"
+#register view provider
 module.exports = QuantumShellModel
 atom.views.addViewProvider QuantumShellModel, QuantumShellView
