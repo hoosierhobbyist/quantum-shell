@@ -1,10 +1,10 @@
 #node core
-fs = require 'fs'
 path = require 'path'
 {exec} = require 'child_process'
 #node modules
 split = require 'split'
 through = require 'through2'
+_ = require 'underscore-plus'
 #atom core/modules
 {CompositeDisposable} = require 'atom'
 QuantumShellView = require './quantum-shell-view'
@@ -33,7 +33,7 @@ class QuantumShellModel
     maxHistory: 100
     user: process.env.USER or process.env.USERNAME
     home: process.env.HOME or process.env.HOMEPATH
-    version: atom.packages.getLoadedPackage('quantum-shell').metadata.version
+    version: require(path.join(__dirname, '../package.json'))['version']
     
     constructor: (state = {}) ->
         #disposables
@@ -46,10 +46,9 @@ class QuantumShellModel
         @history = state.history or []
         @lwd = state.lwd or ''
         @pwd = state.pwd or atom.project.path or @home
-        @env = state.env or Object.create null
+        @env = state.env or {}
         unless state.env?
             @env[k] = v for own k, v of process.env
-            #@env.SUDO_ASKPASS = '/usr/bin/gksudo'
         
         #return output to the user
         @dataStream.on 'data', (chunk) =>
@@ -188,119 +187,8 @@ class QuantumShellModel
                 if atom.inDevMode()
                     console.log "QUANTUM SHELL EXIT CODE: #{code}"
                     console.log "QUANTUM SHELL EXIT SIGNAL: #{signal}"
-    
-    #builtins
-    _pwd: -> @dataStream.write @pwd
-    _echo: (input) -> @dataStream.write input.slice 5
-    _clear: ->
-        while element = @output.firstChild
-            @output.removeChild element
-        return
-    _history: ->
-        for line, i in @history.reverse() when i < @history.length - 1
-            @dataStream.write "#{i}: #{line}"
-        @history.reverse()
-    _printenv: (input) ->
-        tokens = input.split /\s+/
-        if tokens.length is 1
-            for own key, value of @env
-                @dataStream.write "#{key} = #{value}"
-        else
-            if @env[tokens[1]]?
-                @dataStream.write @env[tokens[1]]
-        return
-    _cd: (input) ->
-        tokens = input.split(/\s+/)
-        
-        if tokens.length is 1
-            @lwd = @pwd
-            @pwd = @home
-            @input.placeholder = "#{@user}@atom:~$"
-        else if tokens[1] is '-'
-            [@pwd, @lwd] = [@lwd, @pwd]
-            @input.placeholder = "#{@user}@atom:#{@pwd.replace @home, '~'}$"
-        else if tokens[1].match /^-./
-            @errorStream.write "quantum-shell: cd: invalid option"
-        else
-            newPWD = path.resolve @pwd, tokens[1].replace '~', @home
-            fs.exists newPWD, (itExists) =>
-                if itExists
-                    fs.stat newPWD, (error, stats) =>
-                        if error
-                            console.log "QUANTUM SHELL CD ERROR: #{error}"
-                        else
-                            if stats.isDirectory()
-                                try
-                                    exec 'ls', cwd: newPWD, env: @env
-                                    @lwd = @pwd
-                                    @pwd = newPWD
-                                    @input.placeholder = "#{@user}@atom:#{@pwd.replace @home, '~'}$"
-                                catch error
-                                    if error.errno is 'EACCES'
-                                        @errorStream.write "quantum-shell: cd: #{tokens[1]} permission denied"
-                                    else
-                                        console.log "QUANTUM SHELL CD ERROR: #{error}"
-                            else
-                                @errorStream.write "quantum-shell: cd: #{tokens[1]} is not a directory"
-                else
-                    @errorStream.write "quantum-shell: cd: no such file or directory"
-    _export: (input) ->
-        tokens = input.split /\s+/
-        if tokens.length is 1
-            @_printenv input
-        else if tokens.length > 2
-            if tokens[2] is '='
-                enVar = tokens[1]
-                value = tokens.slice(3).join(' ')
-                @env[enVar] = value
-            else
-                @errorStream.write "quantum-shell: export: missing '=' after environment variable name"
-    _alias: (input) ->
-        tokens = input.split /\s+/
-        if tokens.length is 1
-            for own key, expansion of @aliases
-                @dataStream.write "#{key} = #{expansion}"
-        else if tokens.length is 2
-            if @aliases[tokens[1]]
-                @dataStream.write @aliases[tokens[1]]
-            else
-                @errorStream.write "quantum-shell: alias: #{tokens[1]} no such alias"
-        else
-            if tokens[2] is '='
-                key = tokens[1]
-                expansion = tokens.slice(3).join(' ')
-                @aliases[key] = expansion
-            else
-                @errorStream.write "quantum-shell: alias: missing '=' after alias name"
-    _unalias: (input) ->
-        for own key, expansion of @aliases
-            input = input.replace expansion, key
-        tokens = input.split /\s+/
-        for token in tokens.slice(1)
-            if @aliases[token]?
-                delete @aliases[token]
-            else
-                @errorStream.write "quantum-shell: unalias: #{token} no such alias"
-    
-    #special builtins
-    _atom: (input) ->
-        tokens = input.split /\s+/
-        if tokens.length > 1
-            if tokens.length < 3
-                command = tokens[1]
-                selector = 'atom-workspace'
-            else
-                command = tokens[2]
-                selector = tokens[1]
-            
-            if target = document.querySelector selector
-                if atom.commands.dispatch target, command
-                    setTimeout (=> @input.focus()), 100
-                    @dataStream.write "quantum-shell: atom: command '#{command}' was dispatched to target '#{selector}'"
-                else
-                    @errorStream.write "quantum-shell: atom: '#{command}' is not a valid command at target '#{selector}'"
-            else
-                @errorStream.write "quantum-shell: atom: '#{selector}' is not a valid target"
+
 #register view provider
 module.exports = QuantumShellModel
 atom.views.addViewProvider QuantumShellModel, QuantumShellView
+_.extend QuantumShellModel::, require('./builtins/sh'), require('./builtins/bash'), require('./builtins/custom')
