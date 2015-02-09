@@ -9,7 +9,11 @@ module.exports =
 
     activate: (state) ->
         @subscriptions = new CompositeDisposable()
-        @model = new QuantumShellModel(state.modelState)
+        @model = 
+            if state.modelState?
+                atom.deserializers.deserialize state.modelState
+            else
+                new QuantumShellModel()
         @panel = atom.workspace.addBottomPanel(item: @model, visible: false)
 
         # Register command that toggles this view
@@ -21,7 +25,7 @@ module.exports =
         @subscriptions.dispose()
 
     serialize: ->
-        modelState: @quantumShellModel.serialize()
+        modelState: @model.serialize()
 
     toggle: ->
         if @panel.isVisible()
