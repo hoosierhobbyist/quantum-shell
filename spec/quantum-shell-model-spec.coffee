@@ -1,16 +1,13 @@
 path = require 'path'
+{CompositeDisposable} = require 'atom'
+QuantumShellView = require '../lib/quantum-shell-view'
 QuantumShellModel = require '../lib/quantum-shell-model'
 
 describe "QuantumShellModel", ->
     describe "prototype", ->
-        userName = null
-        homePath = null
-        verNum = null
-        
-        beforeEach ->
-            userName = process.env.USER or process.env.USERNAME
-            homePath = process.env.HOME or process.env.HOMEPATH
-            verNum = require(path.join(__dirname, '../package.json'))['version']
+        userName = process.env.USER or process.env.USERNAME
+        homePath = process.env.HOME or process.env.HOMEPATH
+        verNum = require(path.join(__dirname, '../package.json'))['version']
         
         it "should have a maxHistory attribute", ->
             expect(QuantumShellModel::maxHistory).toBeDefined()
@@ -49,10 +46,11 @@ describe "QuantumShellModel", ->
         
         beforeEach ->
             testDummy = new QuantumShellModel()
+        afterEach ->
+            testDummy.destroy()
         
         it "should return a model object", ->
-            expect(testDummy).not.toBeNull()
-            expect(testDummy.__proto__).toBe QuantumShellModel::
+            expect(testDummy instanceof QuantumShellModel).toBe true
         
         it "should have a child attribute", ->
             expect(testDummy.child).toBeDefined()
@@ -70,7 +68,7 @@ describe "QuantumShellModel", ->
         
         it "should have a subscriptions attribute", ->
             expect(testDummy.subscriptions).toBeDefined()
-            expect(testDummy.subscriptions.disposables.length).toBe 4
+            expect(testDummy.subscriptions instanceof CompositeDisposable).toBe true
         
         it "should have an aliases attribute", ->
             expect(testDummy.aliases).toBeDefined()
@@ -82,11 +80,11 @@ describe "QuantumShellModel", ->
         
         it "should have a lwd attribute", ->
             expect(testDummy.lwd).toBeDefined()
-            expect(testDummy.lwd).toBe ''
+            expect(testDummy.lwd).toEqual ''
         
         it "should have a pwd attribute", ->
             expect(testDummy.pwd).toBeDefined()
-            expect(testDummy.pwd).toBe atom.project.path or QuantumShellModel::home
+            expect(testDummy.pwd).toEqual atom.project.path or QuantumShellModel::home
         
         it "should have an env attribute", ->
             expect(testDummy.env).toBeDefined()
@@ -110,6 +108,8 @@ describe "QuantumShellModel", ->
         
         beforeEach ->
             testDummy = new QuantumShellModel testState
+        afterEach ->
+            testDummy.destroy()
         
         it "should set aliases to serialized state", ->
             expect(testDummy.aliases).toBe testState.aliases
@@ -144,6 +144,8 @@ describe "QuantumShellModel", ->
         
         beforeEach ->
             testDummy = new QuantumShellModel testState
+        afterEach ->
+            testDummy.destroy()
         
         it "should return the original state when there have been no changes", ->
             expect(testDummy.serialize()).toEqual testState
@@ -178,20 +180,116 @@ describe "QuantumShellModel", ->
         beforeEach ->
             testDummy = new QuantumShellModel()
             testDummy.child = {kill: ->}
-            spyOn(testDummy.child, 'kill')
-            spyOn(testDummy.dataStream, 'end')
-            spyOn(testDummy.errorStream, 'end')
-            spyOn(testDummy.subscriptions, 'dispose')
+            spyOn(testDummy.child, 'kill').andCallThrough()
+            spyOn(testDummy.dataStream, 'end').andCallThrough()
+            spyOn(testDummy.errorStream, 'end').andCallThrough()
+            spyOn(testDummy.subscriptions, 'dispose').andCallThrough()
             testDummy.destroy()
         
         it "should kill the child process", ->
             expect(testDummy.child.kill).toHaveBeenCalled()
         
-        it "should end the dataStream", ->
+        it "should close the data stream", ->
             expect(testDummy.dataStream.end).toHaveBeenCalled()
         
-        it "should end the errorStream", ->
+        it "should close the error stream", ->
             expect(testDummy.errorStream.end).toHaveBeenCalled()
         
         it "should dispose of the subscriptions", ->
             expect(testDummy.subscriptions.dispose).toHaveBeenCalled()
+    
+    describe "::process", ->
+        testDummy = null
+        
+        beforeEach ->
+            for own key of QuantumShellModel:: when /^_/.test key
+                delete QuantumShellModel::[key]
+            testDummy = new QuantumShellModel()
+            QuantumShellView testDummy
+            spyOn(testDummy, 'exec')
+            spyOn(testDummy, 'process').andCallThrough()
+        afterEach ->
+            testDummy.destroy()
+            QuantumShellModel::maxHistory = 100
+        
+        it "should not have any builtins for these tests", ->
+            for own key of testDummy.__proto__
+                expect(key).not.toMatch /^_/
+        
+        it "should cache an input and an output reference", ->
+            expect(testDummy.input).toBeDefined()
+            expect(testDummy.output).toBeDefined()
+        
+        it "should adjust the history queue", ->
+            expect(testDummy.history.pos).toBeUndefined()
+            expect(testDummy.history.dir).toBeUndefined()
+            expect(testDummy.history.temp).toBeUndefined()
+            
+            testDummy.process "foo bar"
+            expect(testDummy.process).toHaveBeenCalled()
+            expect(testDummy.history.pos).toBe -1
+            expect(testDummy.history.dir).toBe ''
+            expect(testDummy.history.temp).toBe ''
+            expect(testDummy.history.length).toBe 1
+            expect(testDummy.history[0]).toBe "foo bar"
+        
+        it "should record no more than ::maxHistory entries", ->
+            QuantumShellModel::maxHistory = 1
+            testDummy.process "foo"
+            testDummy.process "bar"
+            expect(testDummy.process.calls.length).toBe 2
+            expect(testDummy.history.length).toBe 1
+            expect(testDummy.history[0]).toBe "bar"
+        
+        it "should expand registered aliases", ->
+            testDummy.aliases['foo'] = 'foo bar'
+            testDummy.process 'foo test'
+            expect(testDummy.exec).toHaveBeenCalledWith 'foo bar test'
+        
+        it "should expand environment variables starting with '$'", ->
+            testDummy.env['FOO'] = 'FOO BAR'
+            testDummy.process 'testing $FOO'
+            expect(testDummy.exec).toHaveBeenCalledWith 'testing FOO BAR'
+        
+        #TODO find a reliable way to test builtin delegating logic
+    
+    describe "::exec", ->
+        dataSpy = null
+        errorSpy = null
+        testDummy = null
+        
+        beforeEach ->
+            testDummy = new QuantumShellModel()
+            testDummy.dataStream.on 'pipe', dataSpy = jasmine.createSpy 'dataSpy'
+            testDummy.errorStream.on 'pipe', errorSpy = jasmine.createSpy 'errorSpy'
+        afterEach ->
+            testDummy.destroy()
+        
+        it "should create a child process instance", ->
+            expect(testDummy.child).toBeNull()
+            testDummy.exec 'node'
+            expect(testDummy.child).not.toBeNull()
+        
+        it "should not override an existing process", ->
+            testDummy.exec 'node'
+            node = testDummy.child
+            testDummy.exec 'coffee'
+            expect(testDummy.child).toBe node
+        
+        it "should pipe the child's stdout to the data stream", ->
+            testDummy.exec 'node'
+            expect(dataSpy).toHaveBeenCalled()
+        
+        it "should pipe the child's stderr to the error stream", ->
+            testDummy.exec 'node'
+            expect(errorSpy).toHaveBeenCalled()
+        
+        it "should reset the child to null on an exec error", ->
+            testDummy.exec 'flagibittyflaggistygooberty --what --kind --of --name --is --this?'
+            expect(testDummy.child).toBeNull()
+        
+        it "should reset the child to null after exiting", ->
+            testDummy.exec 'node'
+            expect(testDummy.child).not.toBeNull()
+            testDummy.child.kill()
+            expect(testDummy.child).toBeNull()
