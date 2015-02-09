@@ -35,6 +35,10 @@ class QuantumShellModel
     home: process.env.HOME or process.env.HOMEPATH
     version: require(path.join(__dirname, '../package.json'))['version']
     
+    #deserialization
+    atom.deserializers.add this
+    @deserialize: (state) -> new QuantumShellModel state
+    
     constructor: (state = {}) ->
         #disposables
         @child = null
@@ -128,6 +132,7 @@ class QuantumShellModel
         env: @env
         history: @history
         aliases: @aliases
+        deserializer: 'QuantumShellModel'
     
     destroy: ->
         @child?.kill()
