@@ -25,8 +25,6 @@ other_builtins =
     atom clear history printenv
     '''.replace /\s+/g, '$|^'
 
-_builtins = RegExp '(^' + sh_builtins + '$|^' + bash_builtins + '$|^' + other_builtins + '$)'
-
 #primary model class
 class QuantumShellModel
     #class attributes
@@ -34,12 +32,16 @@ class QuantumShellModel
     user: process.env.USER or process.env.USERNAME
     home: process.env.HOME or process.env.HOMEPATH
     version: require(path.join(__dirname, '../package.json'))['version']
+    builtins: RegExp '(^' + sh_builtins + '$|^' + bash_builtins + '$|^' + other_builtins + '$)'
     
     constructor: (state = {}) ->
+        #HTML escape transformation
+        escape = (chunk, enc, callback) ->
+            callback null, _.escape chunk.toString()
         #disposables
         @child = null
-        @dataStream = through()
-        @errorStream = through()
+        @dataStream = through(escape)
+        @errorStream = through(escape)
         @subscriptions = new CompositeDisposable()
         #state attributes
         @history = state.history or []
@@ -49,9 +51,7 @@ class QuantumShellModel
         @aliases = state.aliases or {}
         @lwd = state.lwd or ''
         @pwd = state.pwd or atom.project.path or @home
-        @env = state.env or {}
-        unless state.env?
-            @env[k] = v for own k, v of process.env
+        @env = state.env or _.clone process.env
         
         #return output to the user
         @dataStream.on 'data', (chunk) =>
@@ -143,6 +143,9 @@ class QuantumShellModel
         @subscriptions.dispose()
     
     process: (input) ->
+        #tokenizer regular expression
+        tokenizer = /('[^']+'|"[^"]+"|[^'"\s]+)/g
+        
         #cache input/output references
         @input ?= @view.querySelector '#quantum-shell-input'
         @output ?= @view.querySelector '#quantum-shell-output'
@@ -155,24 +158,30 @@ class QuantumShellModel
             unless @history.unshift(input) <= @maxHistory
                 @history.pop()
         
-        #expand aliases/environment variables
-        for own key, expansion of @aliases
-            input = input.replace ///\w+#{key}\w+///, expansion
-        while enVar = input.match /\$\w+/
-            input = input.replace enVar[0], @env[enVar[0].slice(1)]
+        #tokenize input and expand aliases/environment variables
+        tokens = input.match tokenizer
+        for token in tokens
+            for key, expansion of @aliases
+                token = expansion.match tokenizer if token is key
+        tokens = _.flatten tokens
+        tokens = _.compact tokens
+        for token in tokens when /^\$/.test token
+            token = @env[token.slice(1)].match tokenizer
+        tokens = _.flatten tokens
+        tokens = _.compact tokens
         
         #builtin lookup
-        if builtin = input.split(/\s+/)[0].match(_builtins)
-            builtin = builtin[0]
-            if @['_' + builtin]?.call?
-                @['_' + builtin].call this, input
+        if tokens[0].match @builtins
+            builtin = tokens[0]
+            if @['~' + builtin]?
+                @['~' + builtin].call this, tokens
             else
                 @errorStream.write "quantum-shell: builtin: [#{builtin}] has yet to be implemented"
-                @errorStream.write "For more information please see the relevant issue <a class='text-warning' href='http://github.com/sedabull/quantum-shell/issues/1'>here</a>"
+                @errorStream.write "For more information please see the issue at http://github.com/sedabull/quantum-shell/issues/1"
         
         #pass command to os
         else
-            @exec input
+            @exec tokens.join ' '
     
     exec: (input) ->
         #prevent spawning new child while one is running
