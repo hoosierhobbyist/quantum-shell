@@ -35,10 +35,6 @@ class QuantumShellModel
     home: process.env.HOME or process.env.HOMEPATH
     version: require(path.join(__dirname, '../package.json'))['version']
     
-    #deserialization
-    atom.deserializers.add this
-    @deserialize: (state) -> new QuantumShellModel state
-    
     constructor: (state = {}) ->
         #disposables
         @child = null
@@ -46,8 +42,11 @@ class QuantumShellModel
         @errorStream = through()
         @subscriptions = new CompositeDisposable()
         #state attributes
-        @aliases = state.aliases or {}
         @history = state.history or []
+        @history.pos = -1
+        @history.dir = ''
+        @history.temp = ''
+        @aliases = state.aliases or {}
         @lwd = state.lwd or ''
         @pwd = state.pwd or atom.project.path or @home
         @env = state.env or {}
@@ -93,7 +92,9 @@ class QuantumShellModel
         @subscriptions.add atom.commands.add(
             '#quantum-shell-input'
             'quantum-shell:history-back'
-            => 
+            =>
+                @input ?= @view.querySelector '#quantum-shell-input'
+                @output ?= @view.querySelector '#quantum-shell-output'
                 if @history.pos?
                     if @history.dir is 'forward'
                         @history.dir = 'back'
@@ -111,6 +112,8 @@ class QuantumShellModel
             '#quantum-shell-input'
             'quantum-shell:history-forward'
             =>
+                @input ?= @view.querySelector '#quantum-shell-input'
+                @output ?= @view.querySelector '#quantum-shell-output'
                 if @history.pos?
                     if @history.dir is 'back'
                         @history.dir = 'forward'
@@ -132,7 +135,6 @@ class QuantumShellModel
         env: @env
         history: @history
         aliases: @aliases
-        deserializer: 'QuantumShellModel'
     
     destroy: ->
         @child?.kill()
@@ -155,7 +157,7 @@ class QuantumShellModel
         
         #expand aliases/environment variables
         for own key, expansion of @aliases
-            input = input.replace key, expansion
+            input = input.replace ///\w+#{key}\w+///, expansion
         while enVar = input.match /\$\w+/
             input = input.replace enVar[0], @env[enVar[0].slice(1)]
         
