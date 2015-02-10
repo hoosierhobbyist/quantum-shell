@@ -202,8 +202,8 @@ describe "QuantumShellModel", ->
         testDummy = null
         
         beforeEach ->
-            #for own key of QuantumShellModel:: when /^_/.test key
-            #    delete QuantumShellModel::[key]
+            for own key of QuantumShellModel:: when /^~/.test key
+                delete QuantumShellModel::[key]
             testDummy = new QuantumShellModel()
             QuantumShellView testDummy
             spyOn(testDummy, 'exec')
@@ -211,16 +211,19 @@ describe "QuantumShellModel", ->
         afterEach ->
             testDummy.destroy()
             QuantumShellModel::maxHistory = 100
-        ###
+        
         it "should not have any builtins for these tests", ->
-            for own key of testDummy.__proto__
-                expect(key).not.toMatch /^_/
-        ###
+            for key of testDummy
+                expect(key).not.toMatch /^~/
+        
         it "should cache an input and an output reference", ->
             expect(testDummy.input).toBeDefined()
             expect(testDummy.output).toBeDefined()
         
-        it "should adjust the history queue", ->
+        it "should reset the history queue", ->
+            testDummy.history.pos = 8
+            testDummy.history.dir = 'garbage'
+            testDummy.history.temp = 'more garbage'
             testDummy.process "foo bar"
             expect(testDummy.process).toHaveBeenCalled()
             expect(testDummy.history.pos).toBe -1
@@ -242,12 +245,48 @@ describe "QuantumShellModel", ->
             testDummy.process 'foo test'
             expect(testDummy.exec).toHaveBeenCalledWith 'foo bar test'
         
-        it "should expand environment variables starting with '$'", ->
-            testDummy.env['FOO'] = 'FOO BAR'
-            testDummy.process 'testing $FOO'
-            expect(testDummy.exec).toHaveBeenCalledWith 'testing FOO BAR'
+        it "should not expand aliases conatined within substrings", ->
+            testDummy.aliases['foo'] = 'foo bar'
+            testDummy.process 'testfoo'
+            expect(testDummy.exec).toHaveBeenCalledWith 'testfoo'
         
-        #TODO find a reliable way to test builtin delegating logic
+        it "should not expand aliases contained within single quotes", ->
+            testDummy.aliases['foo'] = 'foo bar'
+            testDummy.process "testing 'bar foo baz'"
+            expect(testDummy.exec).toHaveBeenCalledWith "testing 'bar foo baz'"
+        
+        it "should not expand aliases contained within double quotes", ->
+            testDummy.aliases['foo'] = 'foo bar'
+            testDummy.process 'testing "bar foo baz"'
+            expect(testDummy.exec).toHaveBeenCalledWith 'testing "bar foo baz"'
+        
+        it "should expand environment variables starting with '$'", ->
+            testDummy.env['FOO'] = 'BAR'
+            testDummy.process 'testing $FOO'
+            expect(testDummy.exec).toHaveBeenCalledWith 'testing BAR'
+        
+        it "should not expand environment variables contained within substrings", ->
+            testDummy.env['FOO'] = 'BAR'
+            testDummy.process 'testing$FOO'
+            expect(testDummy.exec).toHaveBeenCalledWith 'testing$FOO'
+        
+        it "should not expand environment variables contained within single quotes", ->
+            testDummy.env['FOO'] = 'BAR'
+            testDummy.process "this 'is a $FOO' test"
+            expect(testDummy.exec).toHaveBeenCalledWith "this 'is a $FOO' test"
+        
+        it "should not expand environment variables contained within double quotes", ->
+            testDummy.env['FOO'] = 'BAR'
+            testDummy.process 'this is also "a $FOO test"'
+            expect(testDummy.exec).toHaveBeenCalledWith 'this is also "a $FOO test"'
+        
+        it "should delegate to a builtin when available", ->
+            testing = jasmine.createSpy 'testing'
+            QuantumShellModel::builtins = /^testing$/
+            QuantumShellModel::['~testing'] = testing
+            testDummy.process 'testing 1 2 3'
+            expect(testing).toHaveBeenCalledWith ['testing', '1', '2', '3']
+            expect(testDummy.exec).not.toHaveBeenCalled()
     
     describe "::exec", ->
         dataSpy = null
