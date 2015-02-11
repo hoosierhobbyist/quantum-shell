@@ -184,7 +184,7 @@ class QuantumShellModel
             @exec tokens.join ' '
     
     exec: (input) ->
-        #prevent spawning new child while one is running
+        #prevent overriding existing child
         unless @child
             #new ChildProcess instance
             @child = exec input, cwd: @pwd, env: @env
@@ -192,6 +192,29 @@ class QuantumShellModel
             @child.stdout.pipe(split()).pipe @dataStream, end: false
             @child.stderr.pipe(split()).pipe @errorStream, end: false
             #pipe exec error back to the user
+            @child.on 'error', (error) =>
+                @child.kill()
+                @child = null
+                for line in error.toString().split /\r?\n/
+                    @errorStream.write line
+            #signal that another child can now be created
+            @child.on 'exit', (code, signal) =>
+                @child = null
+                if atom.inDevMode()
+                    console.log "QUANTUM SHELL EXIT CODE: #{code}"
+                    console.log "QUANTUM SHELL EXIT SIGNAL: #{signal}"
+    
+    spawn: (args) ->
+        #prevent overriding existing child
+        unless @child
+            #seperate command
+            cmd = args.shift()
+            #new child process instance
+            @child = spawn cmd, args, cwd: @pwd, env: @env, detached: true
+            #pipe newline seperated output back to the user
+            @child.stdout.pipe(split()).pipe @dataStream, end: false
+            @child.stderr.pipe(split()).pipe @errorStream, end: false
+            #pipe spawn error back to the user
             @child.on 'error', (error) =>
                 @child.kill()
                 @child = null
