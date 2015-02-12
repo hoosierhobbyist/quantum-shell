@@ -10,7 +10,7 @@ _ = require 'underscore-plus'
 QuantumShellView = require './quantum-shell-view'
 
 #builtin commands
-sh_builtins = 
+sh_builtins =
     '''
     : \\. break cd continue eval exec exit export getopts hash
     pwd readonly return shift test times trap umask unset
@@ -33,7 +33,7 @@ class QuantumShellModel
     home: process.env.HOME or process.env.HOMEPATH
     version: require(path.join(__dirname, '../package.json'))['version']
     builtins: RegExp '(^' + sh_builtins + '$|^' + bash_builtins + '$|^' + other_builtins + '$)'
-    
+
     constructor: (state = {}) ->
         #HTML escape transformation
         escape = (chunk, enc, callback) ->
@@ -52,7 +52,7 @@ class QuantumShellModel
         @lwd = state.lwd or ''
         @pwd = state.pwd or atom.project.path or @home
         @env = state.env or _.clone process.env
-        
+
         #return output to the user
         @dataStream.on 'data', (chunk) =>
             line = document.createElement 'div'
@@ -68,18 +68,18 @@ class QuantumShellModel
             line.classList.add 'quantum-shell-error'
             @output.appendChild line
             @output.scrollTop = Infinity
-        
+
         #log any internal errors
         @dataStream.on 'error', (error) ->
             console.log "QUANTUM SHELL DATA STREAM ERROR: #{error}"
         @errorStream.on 'error', (error) ->
             console.log "QUANTUM SHELL ERROR STREAM ERROR: #{error}"
-        
+
         #event subscriptions
         @subscriptions.add atom.commands.add(
             '#quantum-shell'
             'quantum-shell:kill-process'
-            => 
+            =>
                 if @child?
                     @child.kill()
                     @child = null
@@ -128,28 +128,28 @@ class QuantumShellModel
                         @input.value = @history.temp
                         @history.temp = ''
         )#end history-forward command
-    
+
     serialize: ->
         pwd: @pwd
         lwd: @lwd
         env: @env
         history: @history
         aliases: @aliases
-    
+
     destroy: ->
         @child?.kill()
         @dataStream.end()
         @errorStream.end()
         @subscriptions.dispose()
-    
+
     process: (input) ->
         #tokenizer regular expression
         tokenizer = /('[^']+'|"[^"]+"|[^'"\s]+)/g
-        
+
         #cache input/output references
         @input ?= @view.querySelector '#quantum-shell-input'
         @output ?= @view.querySelector '#quantum-shell-output'
-        
+
         #adjust the history queue
         @history.pos = -1
         @history.dir = ''
@@ -157,11 +157,11 @@ class QuantumShellModel
         unless input is @history[0]
             unless @history.unshift(input) <= @maxHistory
                 @history.pop()
-        
+
         #tokenize input and expand aliases/environment variables
         tokens = input.match tokenizer
         for token in tokens
-            for key, expansion of @aliases
+            for own key, expansion of @aliases
                 token = expansion.match tokenizer if token is key
         tokens = _.flatten tokens
         tokens = _.compact tokens
@@ -169,7 +169,7 @@ class QuantumShellModel
             token = @env[token.slice(1)].match tokenizer
         tokens = _.flatten tokens
         tokens = _.compact tokens
-        
+
         #builtin lookup
         if tokens[0].match @builtins
             builtin = tokens[0]
@@ -178,11 +178,11 @@ class QuantumShellModel
             else
                 @errorStream.write "quantum-shell: builtin: [#{builtin}] has yet to be implemented"
                 @errorStream.write "For more information please see the issue at http://github.com/sedabull/quantum-shell/issues/1"
-        
+
         #pass command to os
         else
             @exec tokens.join ' '
-    
+
     exec: (input) ->
         #prevent overriding existing child
         unless @child
@@ -203,7 +203,7 @@ class QuantumShellModel
                 if atom.inDevMode()
                     console.log "QUANTUM SHELL EXIT CODE: #{code}"
                     console.log "QUANTUM SHELL EXIT SIGNAL: #{signal}"
-    
+
     spawn: (args) ->
         #prevent overriding existing child
         unless @child
