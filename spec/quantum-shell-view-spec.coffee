@@ -3,7 +3,6 @@ QuantumShellModel = require '../lib/quantum-shell-model'
 
 describe 'QuantumShellView', ->
     testDummy = null
-    processSpy = null
     
     beforeEach ->
         testDummy = new QuantumShellModel()
