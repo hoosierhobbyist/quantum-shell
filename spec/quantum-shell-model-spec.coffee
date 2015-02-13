@@ -238,7 +238,7 @@ describe "QuantumShellModel", ->
             expect(testDummy.history.length).toBe 1
             expect(testDummy.history[0]).toBe "bar"
 
-        it "should expand registered aliases", ->
+        xit "should expand registered aliases", ->
             testDummy.aliases['foo'] = 'foo bar'
             testDummy.process 'foo test'
             expect(testDummy.exec).toHaveBeenCalledWith 'foo bar test'
@@ -258,7 +258,7 @@ describe "QuantumShellModel", ->
             testDummy.process 'testing "bar foo baz"'
             expect(testDummy.exec).toHaveBeenCalledWith 'testing "bar foo baz"'
 
-        it "should expand environment variables starting with '$'", ->
+        xit "should expand environment variables starting with '$'", ->
             testDummy.env['FOO'] = 'BAR'
             testDummy.process 'testing $FOO'
             expect(testDummy.exec).toHaveBeenCalledWith 'testing BAR'

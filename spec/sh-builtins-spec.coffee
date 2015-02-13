@@ -1,7 +1,7 @@
 path = require 'path'
 sh_builtins = require '../lib/builtins/sh'
 
-describe "sh_builtins", ->
+describe "sh-builtins", ->
     testDummy = null
 
     beforeEach ->
