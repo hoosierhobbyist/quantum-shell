@@ -8,7 +8,7 @@ module.exports =
             @dataStream.write @pwd
         else
             @errorStream.write "quantum-shell: pwd: internal error - expected '#{tokens[0]}' to be 'pwd'"
-    
+
     '~export': (tokens) ->
         if tokens[0] is 'export'
             if tokens.length != 4
@@ -20,7 +20,7 @@ module.exports =
                     @errorStream.write "quantum-shell: export: missing '=' after environment variable name"
         else
             @errorStream.write "quantum-shell: export: internal error - expected '#{tokens[0]} to be 'export'"
-    
+
     '~cd': (tokens) ->
         if tokens[0] is 'cd'
             if tokens.length is 1
@@ -41,7 +41,7 @@ module.exports =
                     else
                         if stats.isDirectory()
                             try
-                                exec "cd #{newPWD}", cwd: @pwd, env: @env
+                                exec "ls", cwd: newPWD, env: @env
                                 @lwd = @pwd
                                 @pwd = newPWD
                                 @input.placeholder = "#{@user}@atom:#{@pwd.replace @home, '~'}$"
