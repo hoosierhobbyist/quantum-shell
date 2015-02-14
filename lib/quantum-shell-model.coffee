@@ -1,13 +1,12 @@
 #node core
 path = require 'path'
-{exec} = require 'child_process'
+{exec, spawn} = require 'child_process'
 #node modules
 split = require 'split'
 through = require 'through2'
 _ = require 'underscore-plus'
-#atom core/modules
+#atom core
 {CompositeDisposable} = require 'atom'
-QuantumShellView = require './quantum-shell-view'
 
 #builtin commands
 sh_builtins =
@@ -20,7 +19,7 @@ bash_builtins =
     alias bind builtin caller command declare echo enable help let local
     logout mapfile printf read readarray source type typeset ulimit unalias
     '''.replace /\s+/g, '$|^'
-other_builtins =
+custom_builtins =
     '''
     atom clear history printenv shopt
     '''.replace /\s+/g, '$|^'
@@ -32,7 +31,7 @@ class QuantumShellModel
     user: process.env.USER or process.env.USERNAME
     home: process.env.HOME or process.env.HOMEPATH
     version: require(path.join(__dirname, '../package.json'))['version']
-    builtins: RegExp '(^' + sh_builtins + '$|^' + bash_builtins + '$|^' + other_builtins + '$)'
+    builtins: RegExp '(^' + sh_builtins + '$|^' + bash_builtins + '$|^' + custom_builtins + '$)'
 
     constructor: (state = {}) ->
         #HTML escape transformation
@@ -164,7 +163,6 @@ class QuantumShellModel
             for own key, expansion of @aliases
                 token = expansion.match tokenizer if token is key
         tokens = _.flatten tokens
-        tokens = _.compact tokens
         for token in tokens when /^\$/.test token
             token = @env[token.slice(1)].match tokenizer
         tokens = _.flatten tokens
@@ -229,5 +227,4 @@ class QuantumShellModel
 
 #register view provider
 module.exports = QuantumShellModel
-atom.views.addViewProvider QuantumShellModel, QuantumShellView
 _.extend QuantumShellModel::, require('./builtins/sh'), require('./builtins/bash'), require('./builtins/custom')
