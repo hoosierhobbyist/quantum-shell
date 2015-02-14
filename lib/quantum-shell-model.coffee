@@ -12,7 +12,7 @@ QuantumShellView = require './quantum-shell-view'
 #builtin commands
 sh_builtins =
     '''
-    : \\. break cd continue eval exec exit export getopts hash
+    \\. : break cd continue eval exec exit export getopts hash
     pwd readonly return shift test times trap umask unset
     '''.replace /\s+/g, '$|^'
 bash_builtins =
@@ -22,7 +22,7 @@ bash_builtins =
     '''.replace /\s+/g, '$|^'
 other_builtins =
     '''
-    atom clear history printenv
+    atom clear history printenv shopt
     '''.replace /\s+/g, '$|^'
 
 #primary model class
