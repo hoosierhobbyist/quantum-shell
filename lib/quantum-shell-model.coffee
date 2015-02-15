@@ -48,7 +48,7 @@ class QuantumShellModel
         @history.dir = ''
         @history.temp = ''
         @aliases = state.aliases or {}
-        @lwd = state.lwd or ''
+        @lwd = state.lwd or @home
         @pwd = state.pwd or atom.project.path or @home
         @env = state.env or _.clone process.env
 
@@ -160,8 +160,8 @@ class QuantumShellModel
         #tokenize input and expand aliases/environment variables
         tokens = input.match tokenizer
         for token in tokens
-            for own key, expansion of @aliases
-                token = expansion.match tokenizer if token is key
+            for own key, expansion of @aliases when token is key
+                token = expansion.match tokenizer
         tokens = _.flatten tokens
         for token in tokens when /^\$/.test token
             token = @env[token.slice(1)].match tokenizer
@@ -225,6 +225,6 @@ class QuantumShellModel
                     console.log "QUANTUM SHELL EXIT CODE: #{code}"
                     console.log "QUANTUM SHELL EXIT SIGNAL: #{signal}"
 
-#register view provider
+#mixin builtins and export
 module.exports = QuantumShellModel
 _.extend QuantumShellModel::, require('./builtins/sh'), require('./builtins/bash'), require('./builtins/custom')
