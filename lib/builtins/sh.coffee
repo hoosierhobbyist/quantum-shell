@@ -31,8 +31,8 @@ module.exports =
                 [@pwd, @lwd] = [@lwd, @pwd]
                 @input.placeholder = "#{@user}@atom:#{@pwd.replace @home, '~'}$"
             else
-                newPWD = path.resolve @pwd, tokens[1].replace '~', @home
-                fs.stat newPWD, (error, stats) =>
+                dir = path.resolve @pwd, tokens[1].replace '~', @home
+                fs.stat dir, (error, stats) =>
                     if error
                         if error.code is 'ENOENT'
                             @errorStream.write "quantum-shell: cd: no such file or directory"
@@ -41,15 +41,16 @@ module.exports =
                     else
                         if stats.isDirectory()
                             try
-                                exec "ls", cwd: newPWD, env: @env
-                                @lwd = @pwd
-                                @pwd = newPWD
+                                cd = exec "cd #{dir}", cwd: @pwd, env: @env
+                                [@lwd, @pwd] = [@pwd, dir]
                                 @input.placeholder = "#{@user}@atom:#{@pwd.replace @home, '~'}$"
                             catch error
-                                if error.errno is 'EACCES'
+                                if error.code is 'EPERM'
                                     @errorStream.write "quantum-shell: cd: #{tokens[1]} permission denied"
                                 else
                                     console.log "QUANTUM SHELL CD ERROR: #{error}"
+                            finally
+                                cd.kill()
                         else
                             @errorStream.write "quantum-shell: cd: #{tokens[1]} is not a directory"
         else
