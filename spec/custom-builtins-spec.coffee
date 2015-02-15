@@ -65,3 +65,43 @@ describe "custom-builtins", ->
             expect(testDummy.dataStream.write.calls[1].args[0]).toBe 'bar = BAR'
             expect(testDummy.dataStream.write.calls[2].args[0]).toBe 'baz = BAZ'
             expect(testDummy.dataStream.write.calls[3].args[0]).toBe 'quux = QUUX'
+    
+    describe "atom", ->
+        beforeEach ->
+            testDummy.input =
+                focus: jasmine.createSpy()
+        
+        it "should print an internal error if tokens[0] isnt 'atom'", ->
+            custom_builtins['~atom'].call testDummy, ['garbage']
+            expect(testDummy.errorStream.write).toHaveBeenCalled()
+            expect(testDummy.errorStream.write.mostRecentCall.args[0]).toMatch /internal error/
+        
+        it "should print an error message if an invalid command was entered", ->
+            custom_builtins['~atom'].call testDummy, ['atom', 'not-a-valid:command']
+            expect(testDummy.errorStream.write).toHaveBeenCalled()
+            expect(testDummy.errorStream.write.mostRecentCall.args[0]).toMatch /not a valid command/
+        
+        it "should print an error message if an invalid selector was entered", ->
+            custom_builtins['~atom'].call testDummy, ['atom', 'not-a-valid-selector', 'not-a-valid:command']
+            expect(testDummy.errorStream.write).toHaveBeenCalled()
+            expect(testDummy.errorStream.write.mostRecentCall.args[0]).toMatch /not a valid target/
+        
+        it "should print a friendly greeting when only one token is present", ->
+            custom_builtins['~atom'].call testDummy, ['atom']
+            expect(testDummy.dataStream.write).toHaveBeenCalled()
+            expect(tsetDummy.dataStream.write.mostRecentCall.args[0]).toMatch /Atom.*!/
+        
+        it "should otherwise dispatch the command to an appropriate target", ->
+            runs ->
+                dispatched = false
+                disposable = atom.commands.onWillDispatch ->
+                    dispatched = true
+                custom_builtins['~atom'].call testDummy, ['atom', 'window:toggle-full-screen']
+            waitsFor(
+                -> testDummy.input.focus.calls.length > 0
+                "it should have tried to refocus the input field", 150)
+            runs ->
+                expect(dispatched).toBe true
+                expect(testDummy.dataStream.write).toHaveBeenCalled()
+                disposable.dispose()
+                custom_builtins['~atom'].call testDummy, ['atom', 'window:toggle-full-screen']
