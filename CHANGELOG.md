@@ -1,3 +1,15 @@
+## 0.3.0 - `atom` builtin and proper specs
+* Proper serialization
+* Added new custom builtin `atom`
+* Lots of little bug fixes and refactoring
+* Added experimental `spawn` method (not yet used)
+* Added a whole battery of specs that are passing on Ubuntu 14.04
+* Goals for next release:
+    * more work with `spawn`
+    * continue to improve ui/ux
+    * add configuration settings
+    * experiment with service provider API
+
 ## 0.2.0 - Initial work on builtins
 * `cd` builtin
 * `pwd` builtin

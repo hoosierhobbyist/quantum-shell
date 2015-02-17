@@ -1,9 +1,9 @@
 # See https://atom.io/docs/latest/creating-a-package#menus for more details
 'context-menu':
-  'atom-text-editor': [
+  '#quantum-shell': [
     {
-      'label': 'Toggle quantum-shell'
-      'command': 'quantum-shell:toggle'
+      'label': 'Kill Child Process'
+      'command': 'quantum-shell:kill-process'
     }
   ]
 'menu': [
