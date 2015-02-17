@@ -41,16 +41,14 @@ module.exports =
                     else
                         if stats.isDirectory()
                             try
-                                cd = exec "cd #{dir}", cwd: @pwd, env: @env
+                                ls = exec "ls", cwd: dir, env: @env
                                 [@lwd, @pwd] = [@pwd, dir]
                                 @input.placeholder = "#{@user}@atom:#{@pwd.replace @home, '~'}$"
                             catch error
-                                if error.code is 'EPERM'
+                                if error.errno is 'EACCES'
                                     @errorStream.write "quantum-shell: cd: #{tokens[1]} permission denied"
                                 else
                                     console.log "QUANTUM SHELL CD ERROR: #{error}"
-                            finally
-                                cd.kill()
                         else
                             @errorStream.write "quantum-shell: cd: #{tokens[1]} is not a directory"
         else

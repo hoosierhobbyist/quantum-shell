@@ -80,7 +80,7 @@ describe "QuantumShellModel", ->
 
         it "should have a lwd attribute", ->
             expect(testDummy.lwd).toBeDefined()
-            expect(testDummy.lwd).toEqual ''
+            expect(testDummy.lwd).toEqual QuantumShellModel::home
 
         it "should have a pwd attribute", ->
             expect(testDummy.pwd).toBeDefined()
@@ -238,7 +238,7 @@ describe "QuantumShellModel", ->
             expect(testDummy.history.length).toBe 1
             expect(testDummy.history[0]).toBe "bar"
 
-        xit "should expand registered aliases", ->
+        it "should expand registered aliases", ->
             testDummy.aliases['foo'] = 'foo bar'
             testDummy.process 'foo test'
             expect(testDummy.exec).toHaveBeenCalledWith 'foo bar test'
@@ -258,7 +258,7 @@ describe "QuantumShellModel", ->
             testDummy.process 'testing "bar foo baz"'
             expect(testDummy.exec).toHaveBeenCalledWith 'testing "bar foo baz"'
 
-        xit "should expand environment variables starting with '$'", ->
+        it "should expand environment variables", ->
             testDummy.env['FOO'] = 'BAR'
             testDummy.process 'testing $FOO'
             expect(testDummy.exec).toHaveBeenCalledWith 'testing BAR'
@@ -275,8 +275,8 @@ describe "QuantumShellModel", ->
 
         it "should not expand environment variables contained within double quotes", ->
             testDummy.env['FOO'] = 'BAR'
-            testDummy.process 'this is also "a $FOO test"'
-            expect(testDummy.exec).toHaveBeenCalledWith 'this is also "a $FOO test"'
+            testDummy.process 'this is also a "$FOO test"'
+            expect(testDummy.exec).toHaveBeenCalledWith 'this is also a "$FOO test"'
 
         it "should delegate to a builtin when available", ->
             QuantumShellModel::builtins = /^testing$/

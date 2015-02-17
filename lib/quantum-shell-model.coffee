@@ -159,12 +159,12 @@ class QuantumShellModel
 
         #tokenize input and expand aliases/environment variables
         tokens = input.match tokenizer
-        for token in tokens
+        for token, i in tokens
             for own key, expansion of @aliases when token is key
-                token = expansion.match tokenizer
+                tokens[i] = expansion.match tokenizer
         tokens = _.flatten tokens
-        for token in tokens when /^\$/.test token
-            token = @env[token.slice(1)].match tokenizer
+        for token, i in tokens when /^\$/.test token
+            tokens[i] = @env[token.slice(1)].match tokenizer
         tokens = _.flatten tokens
         tokens = _.compact tokens
 

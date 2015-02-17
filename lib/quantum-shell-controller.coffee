@@ -8,15 +8,14 @@ module.exports =
     lastPane: null
     subscriptions: null
 
-    activate: (state) ->
-        #register view provider
-        atom.views.addViewProvider QuantumShellModel, QuantumShellView
-
+    activate: (state = {}) ->
         #instansiate package variables
         @subscriptions = new CompositeDisposable()
+        @subscriptions.add atom.views.addViewProvider QuantumShellModel, QuantumShellView
+        @subscriptions.add atom.commands.add 'atom-workspace', 'quantum-shell:toggle': => @toggle()
+        
         @model = new QuantumShellModel state.modelState
         @panel = atom.workspace.addBottomPanel item: @model, visible: false
-        @subscriptions.add atom.commands.add 'atom-workspace', 'quantum-shell:toggle': => @toggle()
 
     deactivate: ->
         @panel.destroy()
