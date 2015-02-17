@@ -51,6 +51,16 @@ alias tfs = atom window:toggle-full-screen
 Then whenever you want to activate that command just type a simple `tfs` into the command line and let `quantum-shell` do the rest!
 
 If you're thinking to yourself, "Wow, this is an incredibly powerful alternative to memorizing *all* of those keybindings...", then I'd say you and I think a lot alike, my friend :wink:
+Any word prefixed with a `$` will be interpreted by quantum-shell as an environment variable and replaced with the appropriate value. What this means is that the command
+```
+echo $PATH
+```
+should return something like
+```
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+```
+In addition, the entire environment can be viewed at once with the builtin command `printenv`. You can even add to the environment using the `export` command. The syntax for this command is exactly the same as `alias` (see above).
+>>>>>>> master
 ### Looks Good in any Theme!
 ![light](https://raw.githubusercontent.com/sedabull/quantum-shell/master/resources/quantum-shell-light.png)
 
