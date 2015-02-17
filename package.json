@@ -1,6 +1,6 @@
 {
   "name": "quantum-shell",
-  "main": "./lib/quantum-shell",
+  "main": "./lib/quantum-shell-controller",
   "version": "0.3.0",
   "author": {
     "name": "Seth David Bullock",
