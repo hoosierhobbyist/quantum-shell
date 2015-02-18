@@ -1,3 +1,6 @@
+## 0.3.1 - fix activation bug
+* Addrees issue #4
+
 ## 0.3.0 - `atom` builtin and proper specs
 * Proper serialization
 * Added new custom builtin `atom`
