@@ -1,3 +1,6 @@
+## 0.3.3 - *actually* fix README error
+* Whoops...
+
 ## 0.3.2 - fix README error
 * Removed some unwanted text from the README.md file
 
