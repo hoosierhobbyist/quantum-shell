@@ -60,7 +60,6 @@ should return something like
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
 In addition, the entire environment can be viewed at once with the builtin command `printenv`. You can even add to the environment using the `export` command. The syntax for this command is exactly the same as `alias` (see above).
->>>>>>> master
 ### Looks Good in any Theme!
 ![light](https://raw.githubusercontent.com/sedabull/quantum-shell/master/resources/quantum-shell-light.png)
 
