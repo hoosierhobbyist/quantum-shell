@@ -158,7 +158,7 @@ class QuantumShellModel
                 @history.pop()
 
         #tokenize input and expand aliases/environment variables
-        tokens = input.match tokenizer
+        tokens = input.match(tokenizer) or []
         for token, i in tokens
             for own key, expansion of @aliases when token is key
                 tokens[i] = expansion.match tokenizer
@@ -167,6 +167,7 @@ class QuantumShellModel
             tokens[i] = @env[token.slice(1)].match tokenizer
         tokens = _.flatten tokens
         tokens = _.compact tokens
+        return if tokens.length is 0
 
         #builtin lookup
         if tokens[0].match @builtins
