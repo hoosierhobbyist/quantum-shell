@@ -1,3 +1,6 @@
+## 0.3.4 - bug fix
+* Quantum Shell would throw an error if an empty string was entered
+
 ## 0.3.3 - *actually* fix README error
 * Whoops...
 
