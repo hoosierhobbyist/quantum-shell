@@ -7,12 +7,16 @@
     "email": "sedabull@gmail.com",
     "url": "http://github.com/sedabull"
   },
-  "description": "A terminal emulator for the Atom text editor, inspired by terminal-status and terminal-panel",
+  "description": "A terminal emulator with full history, alias, and environment support!",
   "keywords": [
     "cli",
     "terminal",
+    "shell",
     "command line",
-    "1.0.0-pre API compatiable"
+    "history",
+    "alias",
+    "environment",
+    "builtins"
   ],
   "bugs": {
     "email": "sedabull@gmail.com",
