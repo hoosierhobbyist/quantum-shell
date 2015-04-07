@@ -49,7 +49,7 @@ class QuantumShellModel
         @history.temp = ''
         @aliases = state.aliases or {}
         @lwd = state.lwd or @home
-        @pwd = state.pwd or atom.project.path or @home
+        @pwd = state.pwd or atom.project.getPaths()[0] or @home
         @env = state.env or _.clone process.env
 
         #return output to the user
