@@ -1,4 +1,5 @@
 #node core
+fs = require 'fs'
 path = require 'path'
 {exec, spawn} = require 'child_process'
 #node modules
@@ -37,20 +38,42 @@ class QuantumShellModel
         #HTML escape transformation
         escape = (chunk, enc, callback) ->
             callback null, _.escape chunk.toString()
+        
         #disposables
         @child = null
         @dataStream = through(escape)
         @errorStream = through(escape)
         @subscriptions = new CompositeDisposable()
+        
         #state attributes
         @history = state.history or []
         @history.pos = -1
         @history.dir = ''
         @history.temp = ''
+        @commands = state.commands or null
+        @fileNames = state.fileNames or null
         @aliases = state.aliases or {}
         @lwd = state.lwd or @home
         @pwd = state.pwd or atom.project.getPaths()[0] or @home
         @env = state.env or _.clone process.env
+        
+        unless @commands?
+            @commands = {}
+            PATHS = @env.PATH.split ':'
+            for PATH in PATHS
+                fs.readDir PATH, (err, binaries) =>
+                    if err then return console.error err
+                    for binary in binaries
+                        @commands[binary] = true
+        
+        #build a map of fileNames for tab-completion
+        unless @fileNames
+            @fileNames = {}
+            fs.readDir @pwd, (err, files) =>
+                if err then return console.error err
+                for file in files
+                    @fileNames[file] = true
+            
 
         #return output to the user
         @dataStream.on 'data', (chunk) =>
