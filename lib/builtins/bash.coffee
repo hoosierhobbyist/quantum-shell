@@ -1,10 +1,16 @@
 module.exports =
+    list:
+        '''
+        alias bind builtin caller command declare echo enable help let local
+        logout mapfile printf read readarray source type typeset ulimit unalias
+        '''.split /\s+/
+
     '~echo': (tokens) ->
         if tokens[0] is 'echo'
             @dataStream.write tokens.slice(1).join ' '
         else
             @errorStream.write "quantum-shell: echo: internal error - expected '#{tokens[0]}' to be 'echo'"
-    
+
     '~alias': (tokens) ->
         if tokens[0] is 'alias'
             if tokens.length is 1
@@ -24,7 +30,7 @@ module.exports =
                 @errorStream.write "quantum-shell: alias: invalid input"
         else
             @errorStream.write "quantum-shell: alias: internal error - expected '#{tokens[0]}' to be 'alias'"
-    
+
     '~unalias': (tokens) ->
         if tokens[0] is 'unalias'
             input = tokens.slice(1).join ' '

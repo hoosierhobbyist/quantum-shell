@@ -8,22 +8,10 @@ through = require 'through2'
 _ = require 'underscore-plus'
 #atom core
 {CompositeDisposable} = require 'atom'
-
-#builtin commands
-sh_builtins =
-    '''
-    \\. : break cd continue eval exec exit export getopts hash
-    pwd readonly return shift test times trap umask unset
-    '''.replace /\s+/g, '$|^'
-bash_builtins =
-    '''
-    alias bind builtin caller command declare echo enable help let local
-    logout mapfile printf read readarray source type typeset ulimit unalias
-    '''.replace /\s+/g, '$|^'
-custom_builtins =
-    '''
-    atom clear history printenv shopt
-    '''.replace /\s+/g, '$|^'
+#builtins
+sh = require './builtins/sh'
+bash = require './builtins/bash'
+custom = require './builtins/custom'
 
 #primary model class
 class QuantumShellModel
@@ -32,19 +20,18 @@ class QuantumShellModel
     user: process.env.USER or process.env.USERNAME
     home: process.env.HOME or process.env.HOMEPATH
     version: require(path.join(__dirname, '../package.json'))['version']
-    builtins: RegExp '(^' + sh_builtins + '$|^' + bash_builtins + '$|^' + custom_builtins + '$)'
+    builtins: RegExp '(^' + sh.list.join('$|^') + '$|^' + bash.list.join('$|^') + '$|^' + custom.list.join('$|^') + '$)'
 
     constructor: (state = {}) ->
         #HTML escape transformation
         escape = (chunk, enc, callback) ->
             callback null, _.escape chunk.toString()
-        
+
         #disposables
         @child = null
         @dataStream = through(escape)
         @errorStream = through(escape)
-        @subscriptions = new CompositeDisposable()
-        
+
         #state attributes
         @history = state.history or []
         @history.pos = -1
@@ -56,24 +43,31 @@ class QuantumShellModel
         @lwd = state.lwd or @home
         @pwd = state.pwd or atom.project.getPaths()[0] or @home
         @env = state.env or _.clone process.env
-        
+
+        #build a map of commands for tab-completion
         unless @commands?
             @commands = {}
             PATHS = @env.PATH.split ':'
             for PATH in PATHS
-                fs.readDir PATH, (err, binaries) =>
+                fs.readdir PATH, (err, binaries) =>
                     if err then return console.error err
                     for binary in binaries
                         @commands[binary] = true
-        
+            for command in sh.list
+                @commands[command] = true
+            for command in bash.list
+                @commands[command] = true
+            for command in custom.list
+                @commands[command] = true
+
         #build a map of fileNames for tab-completion
         unless @fileNames
             @fileNames = {}
-            fs.readDir @pwd, (err, files) =>
+            fs.readdir @pwd, (err, files) =>
                 if err then return console.error err
                 for file in files
                     @fileNames[file] = true
-            
+
 
         #return output to the user
         @dataStream.on 'data', (chunk) =>
@@ -97,66 +91,14 @@ class QuantumShellModel
         @errorStream.on 'error', (error) ->
             console.log "QUANTUM SHELL ERROR STREAM ERROR: #{error}"
 
-        #event subscriptions
-        @subscriptions.add atom.commands.add(
-            '#quantum-shell'
-            'quantum-shell:kill-process'
-            =>
-                if @child?
-                    @child.kill()
-                    @child = null
-        )#end kill-process command
-        @subscriptions.add atom.commands.add(
-            '#quantum-shell-input'
-            'quantum-shell:submit'
-            => @view.querySelector('#quantum-shell-submit').click()
-        )#end submit command
-        @subscriptions.add atom.commands.add(
-            '#quantum-shell-input'
-            'quantum-shell:history-back'
-            =>
-                @input ?= @view.querySelector '#quantum-shell-input'
-                @output ?= @view.querySelector '#quantum-shell-output'
-                if @history.pos?
-                    if @history.dir is 'forward'
-                        @history.dir = 'back'
-                        @history.pos += 1
-                    if @history.pos == -1
-                        @history.dir = 'back'
-                        @history.temp = @input.value
-                        @history.pos = 0
-                    if @history.pos < @history.length
-                        @history.dir = 'back'
-                        @input.value = @history[@history.pos]
-                        @history.pos += 1
-        )#end history-back command
-        @subscriptions.add atom.commands.add(
-            '#quantum-shell-input'
-            'quantum-shell:history-forward'
-            =>
-                @input ?= @view.querySelector '#quantum-shell-input'
-                @output ?= @view.querySelector '#quantum-shell-output'
-                if @history.pos?
-                    if @history.dir is 'back'
-                        @history.dir = 'forward'
-                        @history.pos -= 1
-                    if @history.pos > 0
-                        @history.dir = 'forward'
-                        @history.pos -= 1
-                        @input.value = @history[@history.pos]
-                    else if @history.pos is 0
-                        @history.dir = ''
-                        @history.pos = -1
-                        @input.value = @history.temp
-                        @history.temp = ''
-        )#end history-forward command
-
     serialize: ->
         pwd: @pwd
         lwd: @lwd
         env: @env
         history: @history
         aliases: @aliases
+        commands: @commands
+        fileNames: @fileNames
 
     destroy: ->
         @child?.kill()
@@ -167,10 +109,6 @@ class QuantumShellModel
     process: (input) ->
         #tokenizer regular expression
         tokenizer = /('[^']+'|"[^"]+"|[^'"\s]+)/g
-
-        #cache input/output references
-        @input ?= @view.querySelector '#quantum-shell-input'
-        @output ?= @view.querySelector '#quantum-shell-output'
 
         #adjust the history queue
         @history.pos = -1
@@ -251,4 +189,5 @@ class QuantumShellModel
 
 #mixin builtins and export
 module.exports = QuantumShellModel
-_.extend QuantumShellModel::, require('./builtins/sh'), require('./builtins/bash'), require('./builtins/custom')
+_.extend QuantumShellModel::, sh, bash, custom
+delete QuantumShellModel::list

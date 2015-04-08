@@ -17,6 +17,7 @@
   'enter': 'quantum-shell:submit'
   'up': 'quantum-shell:history-back'
   'down': 'quantum-shell:history-forward'
+  'tab': 'quantum-shell:tab-completion'
   'left': 'native!'
   'right': 'native!'
   'backspace': 'native!'
