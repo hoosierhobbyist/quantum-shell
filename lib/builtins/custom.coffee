@@ -1,11 +1,16 @@
 module.exports =
+    list:
+        '''
+        atom clear history printenv shopt
+        '''.split /\s+/
+
     '~clear': (tokens) ->
         if tokens[0] is 'clear'
             while element = @output.firstChild
                 @output.removeChild element
         else
             @errorStream.write "quantum-shell: clear: internal error - expected '#{tokens[0]}' to be 'clear'"
-    
+
     '~history': (tokens) ->
         if tokens[0] is 'history'
             for line, i in @history.reverse() when i < @history.length - 1
@@ -13,7 +18,7 @@ module.exports =
             @history.reverse()
         else
             @errorStream.write "quantum-shell: history: internal error - expected '#{tokens[0]}' to be 'history'"
-    
+
     '~printenv': (tokens) ->
         if tokens[0] is 'printenv'
             if tokens.length is 1
@@ -26,7 +31,7 @@ module.exports =
                     @errorStream.write "quantum-shell: printenv: '#{tokens[1]}' no such environment variable"
         else
             @errorStream.write "quantum-shell: printenv: internal error - expected '#{tokens[0]}' to be 'printenv'"
-    
+
     '~atom': (tokens) ->
         if tokens[0] is 'atom'
             if tokens.length > 1
@@ -36,7 +41,7 @@ module.exports =
                 else
                     command = tokens[2]
                     selector = tokens[1]
-                
+
                 if target = document.querySelector selector
                     if atom.commands.dispatch target, command
                         setTimeout (=> @input.focus()), 100
