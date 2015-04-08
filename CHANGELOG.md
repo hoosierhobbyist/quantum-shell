@@ -1,3 +1,8 @@
+## 0.4.0 - tab completion
+* Added a rotating tab completion feature
+* Fixed a bad dependency on a private atom API
+* General refactoring in the interest of long term maintainability
+
 ## 0.3.4 - bug fix
 * Quantum Shell would throw an error if an empty string was entered
 

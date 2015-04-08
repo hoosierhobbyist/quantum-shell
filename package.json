@@ -12,9 +12,9 @@
     "cli",
     "terminal",
     "shell",
-    "command line",
     "history",
     "alias",
+    "tab-completion",
     "environment",
     "builtins"
   ],

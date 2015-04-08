@@ -5,6 +5,8 @@ A command line interface built directly into Atom! This package is largely inspi
 The initial release of quantum-shell did not allow a user to change directories from wherever the current `process` was running, which is obviously unacceptable. There are now proper `cd` and `pwd` builtin commands so that this will no longer be an issue.
 ### Full `history` support just like you're used to in bash
 Just use the `up` and `down` arrow keys when the input field is focused to quickly navigate through your history. Or use the `history` builtin to view a list of your past 100 commands.
+### New Rotating Tab Completion Feature
+At the request of user @clebrun, I have added a rotating tab completion feature! The way it works is simple. If you have not yet pressed the space-bar, pressing the `tab` key will cause `quantum-shell` to rotate through all of the program names referenced in your $PATH variable (including `quantum-shell` builtins). If you have pressed the space-bar (meaning that you are working on typing word number two or higher), pressing the `tab` key will rotate through all of the file names in you're current working directory (including sub-directories). This is a very exciting new feature, so please feel free to share any comments and/or bugs that you might discover!
 ### Full `alias` and `unalias` support
 For the sake of simplicity of implementation, the syntax is a little different in quantum-shell than other shells. It is:
 ```
