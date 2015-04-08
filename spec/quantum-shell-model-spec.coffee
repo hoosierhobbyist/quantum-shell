@@ -66,10 +66,6 @@ describe "QuantumShellModel", ->
             expect(testDummy.errorStream.listeners('data').length).toBe 1
             expect(testDummy.errorStream.listeners('error').length).toBe 1
 
-        it "should have a subscriptions attribute", ->
-            expect(testDummy.subscriptions).toBeDefined()
-            expect(testDummy.subscriptions instanceof CompositeDisposable).toBe true
-
         it "should have an aliases attribute", ->
             expect(testDummy.aliases).toBeDefined()
             expect(testDummy.aliases).toEqual {}
@@ -84,7 +80,7 @@ describe "QuantumShellModel", ->
 
         it "should have a pwd attribute", ->
             expect(testDummy.pwd).toBeDefined()
-            expect(testDummy.pwd).toEqual atom.project.path or QuantumShellModel::home
+            expect(testDummy.pwd).toEqual atom.project.getPaths()[0] or QuantumShellModel::home
 
         it "should have an env attribute", ->
             expect(testDummy.env).toBeDefined()
@@ -105,6 +101,7 @@ describe "QuantumShellModel", ->
             env:
                 foo: 'bar'
                 baz: 'quux'
+                PATH: __dirname
 
         beforeEach ->
             testDummy = new QuantumShellModel testState
@@ -141,6 +138,9 @@ describe "QuantumShellModel", ->
             env:
                 foo: 'bar'
                 baz: 'quux'
+                PATH: __dirname
+            commands: {}
+            fileNames: {}
 
         beforeEach ->
             testDummy = new QuantumShellModel testState
@@ -173,6 +173,9 @@ describe "QuantumShellModel", ->
                     foo: 'barr'
                     baz: 'quux'
                     short: 'long'
+                    PATH: __dirname
+                commands: {}
+                fileNames: {}
 
     describe "::destroy", ->
         testDummy = null
@@ -183,7 +186,6 @@ describe "QuantumShellModel", ->
             spyOn(testDummy.child, 'kill').andCallThrough()
             spyOn(testDummy.dataStream, 'end').andCallThrough()
             spyOn(testDummy.errorStream, 'end').andCallThrough()
-            spyOn(testDummy.subscriptions, 'dispose').andCallThrough()
             testDummy.destroy()
 
         it "should kill the child process", ->
@@ -194,9 +196,6 @@ describe "QuantumShellModel", ->
 
         it "should close the error stream", ->
             expect(testDummy.errorStream.end).toHaveBeenCalled()
-
-        it "should dispose of the subscriptions", ->
-            expect(testDummy.subscriptions.dispose).toHaveBeenCalled()
 
     describe "::process", ->
         testDummy = null

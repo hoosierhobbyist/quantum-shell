@@ -104,7 +104,6 @@ class QuantumShellModel
         @child?.kill()
         @dataStream.end()
         @errorStream.end()
-        @subscriptions.dispose()
 
     process: (input) ->
         #tokenizer regular expression
