@@ -1,3 +1,6 @@
+## 0.4.1 - bug fix
+* fixed a bug in the tab completion feature that would replace the wrong part of the input string
+
 ## 0.4.0 - tab completion
 * Added a rotating tab completion feature
 * Fixed a bad dependency on a private atom API

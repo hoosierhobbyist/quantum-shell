@@ -85,7 +85,9 @@ module.exports =
                     @model.input.value = tabInput
                 else
                     lastToken = tabInput.match(/('[^']+'|"[^"]+"|[^'"\s]+)/g).pop()
-                    tabInput = tabInput.replace lastToken, tabMatches[tabMatches.index]
+                    index = tabInput.lastIndexOf lastToken
+                    tabInput = tabInput.slice 0, index
+                    tabInput += tabMatches[tabMatches.index]
                     @model.input.value = tabInput
 
                 if tabMatches.index < tabMatches.length - 1
