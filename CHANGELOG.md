@@ -1,3 +1,7 @@
+## 0.4.2 - bug fix
+* see issue #9, `env.PATH` is sometimes `env.Path`
+* a special thank you to user @adrianhall, for reporting and helping to fix this bug!
+
 ## 0.4.1 - bug fix
 * fixed a bug in the tab completion feature that would replace the wrong part of the input string
 
