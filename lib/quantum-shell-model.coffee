@@ -47,7 +47,7 @@ class QuantumShellModel
         #build a map of commands for tab-completion
         unless @commands?
             @commands = {}
-            PATHS = @env.PATH.split ':'
+            PATHS = (@env.PATH or @env.Path or '').split path.delimiter
             for PATH in PATHS
                 fs.readdir PATH, (err, binaries) =>
                     if err then return console.error err
