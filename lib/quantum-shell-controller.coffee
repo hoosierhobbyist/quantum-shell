@@ -49,6 +49,7 @@ module.exports =
         if @model.child?
             @model.child.kill()
             @model.child = null
+            @model.errorStream.write '^C'
 
     historyBack: ->
         if @model.history.dir is 'forward'
