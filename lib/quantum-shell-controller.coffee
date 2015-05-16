@@ -1,3 +1,5 @@
+fs = require 'fs'
+path = require 'path'
 {CompositeDisposable} = require 'atom'
 QuantumShellView = require './quantum-shell-view'
 QuantumShellModel = require './quantum-shell-model'
@@ -96,7 +98,7 @@ module.exports =
                 else
                     tabMatches.index = 0
             else
-                console.log "QUANTUM SHELL: no matches for tab-completion"
+                atom.notifications.addWarning "quantum-shell: no matches for tab-completion"
 
         else
             tabInput = @model.input.value
@@ -108,7 +110,17 @@ module.exports =
                         tabMatches.push command
             else
                 lastToken = tabInput.match(/('[^']+'|"[^"]+"|[^'"\s]+)/g).pop()
-                for own fileName of @model.fileNames
-                    if RegExp('^' + lastToken, 'i').test fileName
-                        tabMatches.push fileName
+                if RegExp(path.sep).test lastToken
+                    try
+                        fileNames = fs.readdirSync path.dirname path.resolve @model.pwd, lastToken
+                        prefix = lastToken.slice 0, lastToken.lastIndexOf(path.sep) + 1
+                        for fileName in fileNames
+                            if RegExp('^' + path.basename(lastToken), 'i').test fileName
+                                tabMatches.push prefix + fileName
+                    catch err
+                        console.error err
+                else
+                    for own fileName of @model.fileNames
+                        if RegExp('^' + lastToken, 'i').test fileName
+                            tabMatches.push fileName
             @tabCompletion()
