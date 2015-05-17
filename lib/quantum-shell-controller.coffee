@@ -13,6 +13,35 @@ module.exports =
     panel: null
     model: null
     subscriptions: null
+    config:
+        maxHistory:
+            type: 'integer'
+            minimum: 0
+            default: 100
+            title: 'Maximum History'
+            description: 'The maximum number of commands that will be saved before the oldest are deleted'
+        maxHeight:
+            type: 'integer'
+            minimum: 0
+            default: 250
+            title: 'Maximum Height'
+            description: 'The maximum height, in pixels, of the shell output div'
+        minHeight:
+            type: 'integer'
+            minimum: 0
+            default: 25
+            title: 'Minimum Height'
+            description: 'The minimum height, in pixels, of the shell output div'
+        shell:
+            type: 'string'
+            default: process.env.SHELL ? '/bin/bash'
+            title: 'Shell Name'
+            description: 'The shell you would like to execute all non-builtin commands'
+        enableBuiltins:
+            type: 'boolean'
+            default: true
+            title: 'Enable Builtins'
+            description: 'Enable and give precedence to custom quantum-shell builtin commands'
 
     activate: (state = {}) ->
         #setup subscriptions
