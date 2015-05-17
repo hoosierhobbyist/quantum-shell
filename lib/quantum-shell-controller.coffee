@@ -34,7 +34,7 @@ module.exports =
             description: 'The minimum height, in pixels, of the shell output div'
         shell:
             type: 'string'
-            default: process.env.SHELL ? '/bin/bash'
+            default: process.env.SHELL ? '/bin/sh'
             title: 'Shell Name'
             description: 'The shell you would like to execute all non-builtin commands'
         enableBuiltins:
