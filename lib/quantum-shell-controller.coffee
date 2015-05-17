@@ -41,23 +41,30 @@ module.exports =
             type: 'boolean'
             default: true
             title: 'Enable Builtins'
-            description: 'Enable and give precedence to custom quantum-shell builtin commands'
+            description: 'Enable and give precedence to custom quantum-shell builtin commands (highly recommended)'
 
     activate: (state = {}) ->
         #setup subscriptions
         @subscriptions = new CompositeDisposable()
         @subscriptions.add atom.views.addViewProvider QuantumShellModel, QuantumShellView
-        @subscriptions.add atom.commands.add 'atom-workspace', 'quantum-shell:toggle', => @toggle()
-        @subscriptions.add atom.commands.add '#quantum-shell', 'quantum-shell:kill-process', => @killProcess()
+        @subscriptions.add atom.commands.add 'atom-workspace',
+            'quantum-shell:toggle', => @toggle()
         @subscriptions.add atom.commands.add '#quantum-shell-input',
             'quantum-shell:submit': => @model.submit.click()
             'quantum-shell:history-back': => @historyBack()
             'quantum-shell:history-forward': => @historyForward()
             'quantum-shell:tab-completion': => @tabCompletion()
+            'quantum-shell:kill-process': => @killProcess()
 
         #instantiate model and panel
         @model = new QuantumShellModel state.modelState
         @panel = atom.workspace.addBottomPanel item: @model, visible: false
+
+        #observe style changes
+        @subscriptions.add atom.config.observe 'quantum-shell.maxHeight', (value) =>
+            @model.output.style.maxHeight = "#{value}px"
+        @subscriptions.add atom.config.observe 'quantum-shell.minHeight', (value) =>
+            @model.output.style.minHeight = "#{value}px"
 
     deactivate: ->
         @panel.destroy()
