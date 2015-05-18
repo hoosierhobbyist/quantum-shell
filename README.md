@@ -1,38 +1,42 @@
 # Quantum Shell for Github's Atom!
-A command line interface built directly into Atom! This package is largely inspired by (but not a direct fork of) [terminal-panel](http://github.com/thedaniel/terminal-panel). The goal of this project is to provide users with a simple, yet powerful tool, that no self-proclaimed 'Hackable' editor should be without. It will maintain strict compliance to the 1.0.0-pre Atom API for now, and once its official, the 1.x API. Currently, this package should run as expected on Atom >=0.174.0 with any standard Linux machine. It will likely perform well on OS X as well, however, that has not yet been tested. Complete Cross-platform compatibility is an eventual goal as are many other things (see the [CHANGELOG](https://github.com/sedabull/quantum-shell/blob/master/CHANGELOG.md) for details).To get started just search for and download 'quantum-shell' in the Atom package manager and press `ctrl-shift-q` to get started. Happy Hacking!
+A command line interface built directly into Atom! This package is largely inspired by (but not a direct fork of) [terminal-panel](http://github.com/thedaniel/terminal-panel). The goal of this project is to provide users with a simple, yet powerful tool, that no self-proclaimed 'Hackable' editor should be without. It is 1.0 ready and should make the transition in June seamlessly. Currently, this package should run as expected on Atom >=0.174.0 with any UNIX like operating system. Windows support is present but limited; I do hope to change that in the future however. To get started just search for and download `quantum-shell` in the Atom package manager, or at the command line type `apm install quantum-shell` and press `ctrl-shift-q` to get started. Happy Hacking!
+
 ## Features
-### Proper `cd` and `pwd` support
-The initial release of quantum-shell did not allow a user to change directories from wherever the current `process` was running, which is obviously unacceptable. There are now proper `cd` and `pwd` builtin commands so that this will no longer be an issue.
+
 ### Full `history` support just like you're used to in bash
-Just use the `up` and `down` arrow keys when the input field is focused to quickly navigate through your history. Or use the `history` builtin to view a list of your past 100 commands.
-### New Rotating Tab Completion Feature
-At the request of user @clebrun, I have added a rotating tab completion feature! The way it works is simple. If you have not yet pressed the space-bar, pressing the `tab` key will cause `quantum-shell` to rotate through all of the program names referenced in your $PATH variable (including `quantum-shell` builtins) that match what you have already typed. If you have pressed the space-bar (meaning that you are working on typing word number two or higher), pressing the `tab` key will rotate through all of the file names in you're current working directory (including sub-directories) that match what you have already typed. This is a very exciting new feature, so please feel free to share any comments and/or bugs that you might discover!
+Just use the `up` and `down` arrow keys when the input field is focused to quickly navigate through your history, or use the `history` builtin to view a list of your past commands. A configuration option for limiting the number of commands to record can now be found under `Settings>Packages>quantum-shell>Maximum History`. The default is 100.
+
+### Rotating Tab Completion
+At the request of user [@clebrun](http://github.com/clebrun), I have added a rotating tab completion feature! The way it works is simple. If you have not yet pressed the space-bar, pressing the `tab` key will cause `quantum-shell` to rotate through all of the program names referenced in your $PATH variable (including `quantum-shell` builtins) that match what you have already typed. If you have pressed the space-bar (meaning that you are working on typing word number two or higher), pressing the `tab` key will rotate through all of the file names along the relative path you have typed. This is a very exciting new feature, so please feel free to share any comments and/or bugs that you might discover!
+
+### Customizable Prompt String
+The prompt string is one of the defining features of any good shell program, and up until now   `quantum-shell`'s has been rather bland, and hard-coded into the program. But that is no more! From now on, anyone using `quantum-shell` can customize their own prompt string under `Settings>Packages>quantum-shell>Prompt String`. Not only that, but I've included semantics for several special escape characters as outlined below:
+* `\@` - current time in 12-hour `HH:MM {am,pm}` format
+* `\A` - current time in 24-hour `HH:MM {am,pm}` format
+* `\d` - current date in `Weekday Month Date` format
+* `\s` - the shell program used to run all non-builtin commands
+* `\t` - current time in 24-hour `HH:MM:SS` format
+* `\T` - current time in 12-hour `HH:MM:SS` format
+* `\u` - the user's username
+* `\v` - the current version of `quantum-shell` in `X.Y` format
+* `\V` - the current version of `quantum-shell` in `X.Y.Z` format
+* `\w` - the full path of the current working directory
+* `\W` - the basename only of the current working directory
+* `\\` - a literal backslash
+
+Feel free to combine these in any way you see fit, and make `quantum-shell` truly your own!
+
 ### Full `alias` and `unalias` support
 For the sake of simplicity of implementation, the syntax is a little different in quantum-shell than other shells. It is:
 ```
 alias <key> = <expansion>
 ```
-
 There are a few things to know about this syntax. First, you can only define one alias at a time. Second, the `key` must be a single word, containing absolutely no whitespace. Third, the `=` must have whitespace on either side of it (i.e. not touching anything). And finally, all of the words to the left of the `=` will be concatenated together and seperated by a single `space`. Whenever quantum-shell detects the `key` in an input command, it will be replaced with `expansion`, unless the key is contained within single `''` or  double `""` quotes. A common and useful example would be
 ```
 alias ll = ls -l
 ```
-### Full `env` support
-Any word prefixed with a `$` will be interpreted by quantum-shell as an environment variable and replaced with the appropriate value, unless the word is contained within single `''` or  double `""` quotes. What this means is that the command
-```
-echo $PATH
-```
-should return something like
-```
-/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-```
-In addition, the entire environment can be viewed at once with the builtin command `printenv`.
+Aliases are serialized, so you should only ever have to type them out once. Even if you completely close Atom down, they should still be there when you return.
 
-You can also modify or add to the environment using the `export` command. The syntax is similar to the `alias` command, except that only one word is allowed on the right hand side of the assignment. Formally, it is:
-```
-export <key> = <value>
-```
-What this means is that if you need whitespace in the `<value>` (which you normally shouldn't), you'll have to wrap it in single `''` or double `""` quotes.
 ### A custom `atom` builtin
 Using the standard `atom` command line tool is a bit redundant, since you're obviously already running `atom`! For that reason I've provided a custom override for the `atom` command that will allow you to simulate any registered event being dispatched wherever you want. The syntax is pretty simple, there are two options:
 ```
@@ -53,6 +57,7 @@ alias tfs = atom window:toggle-full-screen
 Then whenever you want to activate that command just type a simple `tfs` into the command line and let `quantum-shell` do the rest!
 
 If you're thinking to yourself, "Wow, this is an incredibly powerful alternative to memorizing *all* of those keybindings...", then I'd say you and I think a lot alike, my friend :wink:
+
 ### Looks Good in any Theme!
 ![light](https://raw.githubusercontent.com/sedabull/quantum-shell/master/resources/quantum-shell-light.png)
 
