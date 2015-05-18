@@ -13,9 +13,11 @@ module.exports =
 
     '~history': (tokens) ->
         if tokens[0] is 'history'
-            for line, i in @history.reverse() when i < @history.length - 1
-                @dataStream.write "#{i}: #{line}"
-            @history.reverse()
+            len = @history.length - 1
+            for i in [len..0] by -1
+                j = len - i
+                @dataStream.write "#{j}: #{@history[i]}"
+            return
         else
             @errorStream.write "quantum-shell: history: internal error - expected '#{tokens[0]}' to be 'history'"
 

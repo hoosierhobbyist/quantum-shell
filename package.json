@@ -1,22 +1,20 @@
 {
   "name": "quantum-shell",
   "main": "./lib/quantum-shell-controller",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "author": {
     "name": "Seth David Bullock",
     "email": "sedabull@gmail.com",
     "url": "http://github.com/sedabull"
   },
-  "description": "A terminal emulator with full history, alias, and environment support!",
+  "description": "A terminal emulator with full history, alias, and tab-completion features!",
   "keywords": [
-    "cli",
     "terminal",
-    "shell",
-    "history",
-    "alias",
     "tab-completion",
-    "environment",
-    "builtins"
+    "alias",
+    "prompt string",
+    "history",
+    "customizable"
   ],
   "bugs": {
     "email": "sedabull@gmail.com",
@@ -31,7 +29,7 @@
   },
   "license": "MIT",
   "engines": {
-    "atom": ">=0.174.0"
+    "atom": ">=0.174.0 <2.0"
   },
   "dependencies": {
     "split": "^0.3.2",

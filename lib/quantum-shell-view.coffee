@@ -22,7 +22,6 @@ module.exports = (model) ->
 
     #set text to be displayed
     header.innerHTML = "QUANTUM SHELL v-#{model.version}"
-    input.placeholder = "#{model.user}@atom:#{model.pwd.replace model.home, '~'}$"
     submit.innerHTML = 'ENTER'
     output.innerHTML =
         '''
