@@ -106,7 +106,7 @@ class QuantumShellModel
     promptString: (input) ->
         input
             .replace(/\\\\/g, '\0')
-            .replace(/\\s/g, 'quantum-shell')
+            .replace(/\\s/g, path.basename(atom.config.get('quantum-shell.shell')))
             .replace(/\\u/g, atom.config.get('quantum-shell.user'))
             .replace(/\\v/g, @version.slice(0, @version.lastIndexOf('.')))
             .replace(/\\V/g, @version)

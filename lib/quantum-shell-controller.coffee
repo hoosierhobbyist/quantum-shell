@@ -50,9 +50,9 @@ module.exports =
             description: 'The shell you would like to execute all non-builtin commands'
         PS:
             type: 'string'
-            default: '[\\t]\\u@\\s:\\w$'
+            default: '\\u@atom:\\w$'
             title: 'Prompt String'
-            description: 'The string that will act as a placeholder for the input field. Supports basic bash-like expansion (\\s,\\u,\\v,\\V,\\w,\\W,\\\\)'
+            description: 'The string that will act as a placeholder for the input field. Supports basic bash-like expansion (\\@,\\A,\\d,\\t,\\T,\\s,\\u,\\v,\\V,\\w,\\W,\\\\)'
         enableBuiltins:
             type: 'boolean'
             default: true
