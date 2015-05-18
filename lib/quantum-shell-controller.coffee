@@ -17,7 +17,7 @@ module.exports =
     config:
         home:
             type: 'string'
-            default: process.env.HOME or atom.config.get('core.projectHome')
+            default: process.env.HOME or atom.config.get('core.projectHome') or ''
             title: 'Home Directory'
             description: 'You\'re home directory. It will be replaced by a \'~\' in the prompt string and used as the default argument to the \'cd\' command.'
         user:
@@ -45,7 +45,7 @@ module.exports =
             description: 'The minimum height, in pixels, of the shell output div'
         shell:
             type: 'string'
-            default: process.env.SHELL ? '/bin/sh'
+            default: process.env.SHELL or '/bin/sh' or ''
             title: 'Shell Name'
             description: 'The shell you would like to execute all non-builtin commands'
         PS:
@@ -84,6 +84,12 @@ module.exports =
         @subscriptions.add atom.config.observe 'quantum-shell.maxHistory', (value) =>
             if @model.history.length > value
                 @model.history.splice value, Infinity
+
+        #windows specific setup
+        if process.platform is 'win32'
+            atom.config.set 'quantum-shell.shell', 'cmd.exe'
+            atom.config.set 'quantum-shell.user', process.env.USERNAME
+            atom.config.set 'quantum-shell.home', process.env.USERPROFILE
 
     deactivate: ->
         @panel.destroy()
