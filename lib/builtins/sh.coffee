@@ -31,8 +31,8 @@ module.exports =
         if tokens[0] is 'cd'
             if tokens.length is 1
                 @lwd = @pwd
-                @pwd = @home
-                @input.placeholder = "#{@user}@atom:~$"
+                @pwd = atom.config.get('quantum-shell.home')
+                @input.placeholder = @promptString(atom.config.get('quantum-shell.PS'))
                 fs.readdir @pwd, (error, files) =>
                     if error then return console.log "QUANTUM SHELL CD ERROR: #{error}"
                     @fileNames = {}
@@ -40,14 +40,14 @@ module.exports =
                         @fileNames[file] = true
             else if tokens[1] is '-'
                 [@pwd, @lwd] = [@lwd, @pwd]
-                @input.placeholder = "#{@user}@atom:#{@pwd.replace @home, '~'}$"
+                @input.placeholder = @promptString(atom.config.get('quantum-shell.PS'))
                 fs.readdir @pwd, (error, files) =>
                     if error then return console.log "QUANTUM SHELL CD ERROR: #{error}"
                     @fileNames = {}
                     for file in files
                         @fileNames[file] = true
             else
-                dir = path.resolve @pwd, tokens[1].replace '~', @home
+                dir = path.resolve @pwd, tokens[1].replace '~', atom.config.get('quantum-shell.home')
                 fs.stat dir, (error, stats) =>
                     if error
                         if error.code is 'ENOENT'
@@ -59,7 +59,7 @@ module.exports =
                             try
                                 ls = exec "ls", cwd: dir, env: @env
                                 [@lwd, @pwd] = [@pwd, dir]
-                                @input.placeholder = "#{@user}@atom:#{@pwd.replace @home, '~'}$"
+                                @input.placeholder = @promptString(atom.config.get('quantum-shell.PS'))
                                 fs.readdir @pwd, (error, files) =>
                                     if error then return console.log "QUANTUM SHELL CD ERROR: #{error}"
                                     @fileNames = {}

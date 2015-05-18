@@ -1,9 +1,10 @@
 fs = require 'fs'
 path = require 'path'
-{CompositeDisposable} = require 'atom'
+{Disposable, CompositeDisposable} = require 'atom'
 QuantumShellView = require './quantum-shell-view'
 QuantumShellModel = require './quantum-shell-model'
 
+intID = null
 lastPane = null
 tabInput = null
 tabMatches = []
@@ -14,6 +15,16 @@ module.exports =
     model: null
     subscriptions: null
     config:
+        home:
+            type: 'string'
+            default: process.env.HOME or atom.config.get('core.projectHome')
+            title: 'Home Directory'
+            description: 'You\'re home directory. It will be replaced by a \'~\' in the prompt string and used as the default argument to the \'cd\' command.'
+        user:
+            type: 'string'
+            default: process.env.USER or 'user'
+            title: 'User Name'
+            description: 'You\'re user name. \'\\u\' in the prompt string will expand into this value.'
         maxHistory:
             type: 'integer'
             minimum: 0
@@ -37,6 +48,11 @@ module.exports =
             default: process.env.SHELL ? '/bin/sh'
             title: 'Shell Name'
             description: 'The shell you would like to execute all non-builtin commands'
+        PS:
+            type: 'string'
+            default: '[\\t]\\u@\\s:\\w$'
+            title: 'Prompt String'
+            description: 'The string that will act as a placeholder for the input field. Supports basic bash-like expansion (\\s,\\u,\\v,\\V,\\w,\\W,\\\\)'
         enableBuiltins:
             type: 'boolean'
             default: true
@@ -60,16 +76,20 @@ module.exports =
         @model = new QuantumShellModel state.modelState
         @panel = atom.workspace.addBottomPanel item: @model, visible: false
 
-        #observe style changes
+        #observe changes
         @subscriptions.add atom.config.observe 'quantum-shell.maxHeight', (value) =>
             @model.output.style.maxHeight = "#{value}px"
         @subscriptions.add atom.config.observe 'quantum-shell.minHeight', (value) =>
             @model.output.style.minHeight = "#{value}px"
+        @subscriptions.add atom.config.observe 'quantum-shell.maxHistory', (value) =>
+            if @model.history.length > value
+                @model.history.splice value, Infinity
 
     deactivate: ->
         @panel.destroy()
         @model.destroy()
         @subscriptions.dispose()
+        if intID then clearInterval intID
 
     serialize: ->
         modelState: @model.serialize()
@@ -78,10 +98,12 @@ module.exports =
         if @panel.isVisible()
             @panel.hide()
             lastPane.activate()
+            clearInterval intID
         else
             lastPane = atom.workspace.getActivePane()
             @panel.show()
             @model.input.focus()
+            intID = setInterval (=> @model.input.placeholder = @model.promptString(atom.config.get('quantum-shell.PS'))), 100
 
     killProcess: ->
         if @model.child?

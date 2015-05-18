@@ -9,6 +9,7 @@ _ = require 'underscore-plus'
 #atom core
 {CompositeDisposable} = require 'atom'
 #builtins
+time = require './util/time'
 sh = require './builtins/sh'
 bash = require './builtins/bash'
 custom = require './builtins/custom'
@@ -16,8 +17,6 @@ custom = require './builtins/custom'
 #primary model class
 class QuantumShellModel
     #class attributes
-    user: process.env.USER or process.env.USERNAME
-    home: process.env.HOME or process.env.HOMEPATH
     version: require(path.join(__dirname, '../package.json'))['version']
     builtins: RegExp '(^' + sh.list.join('$|^') + '$|^' + bash.list.join('$|^') + '$|^' + custom.list.join('$|^') + '$)'
 
@@ -39,8 +38,8 @@ class QuantumShellModel
         @commands = state.commands or null
         @fileNames = state.fileNames or null
         @aliases = state.aliases or {}
-        @lwd = state.lwd or @home
-        @pwd = state.pwd or atom.project.getPaths()[0] or @home
+        @lwd = state.lwd or atom.config.get('quantum-shell.home')
+        @pwd = state.pwd or atom.project.getPaths()[0] or atom.config.get('quantum-shell.home')
         @env = state.env or _.clone process.env
 
         #build a map of commands for tab-completion
@@ -104,6 +103,22 @@ class QuantumShellModel
         @dataStream.end()
         @errorStream.end()
 
+    promptString: (input) ->
+        input
+            .replace(/\\\\/g, '\0')
+            .replace(/\\s/g, 'quantum-shell')
+            .replace(/\\u/g, atom.config.get('quantum-shell.user'))
+            .replace(/\\v/g, @version.slice(0, @version.lastIndexOf('.')))
+            .replace(/\\V/g, @version)
+            .replace(/\\w/g, @pwd.replace(atom.config.get('quantum-shell.home'), '~'))
+            .replace(/\\W/g, path.basename(@pwd.replace(atom.config.get('quantum-shell.home', '~'))))
+            .replace(/\\d/g, time('\\d'))
+            .replace(/\\t/g, time('\\t'))
+            .replace(/\\T/g, time('\\T'))
+            .replace(/\\@/g, time('\\@'))
+            .replace(/\\A/g, time('\\A'))
+            .replace('\0', '\\')
+
     process: (input) ->
         #tokenizer regular expression
         tokenizer = /('[^']+'|"[^"]+"|[^'"\s]+)/g
@@ -113,7 +128,7 @@ class QuantumShellModel
         @history.dir = ''
         @history.temp = ''
         unless input is @history[0]
-            unless @history.unshift(input) <= atom.config.get('quantum-shell.maxHistory') + 1
+            unless @history.unshift(input) <= atom.config.get('quantum-shell.maxHistory')
                 @history.pop()
 
         #tokenize input and expand aliases/environment variables
