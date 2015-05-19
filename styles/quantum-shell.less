@@ -17,30 +17,39 @@
         border: 3px groove @panel-heading-border-color;
         background-color: @panel-heading-background-color;
     }
-    #quantum-shell-output{
-        margin: 0px;
-        padding: 0px 3px;
-        //min-height: 25px;
-        //max-height: 250px;
-        overflow-y: scroll;
-        font-size: @font-size;
-        font-family: monospace;
-        border-radius: @component-border-radius;
-        border: 3px groove @inset-panel-border-color;
+    #quantum-shell-body{
         background-color: @inset-panel-background-color;
-        .quantum-shell-command{
-            &:before{
-                content: '$>';
+        #quantum-shell-btns{
+            padding: 3px;
+            overflow-x: auto;
+            border-radius: @component-border-radius;
+            border: 3px groove @inset-panel-border-color;
+            .btn{
+                padding-top:4px; 
             }
         }
-        .quantum-shell-data{
-            &:before{
-                content: '~~';
+        #quantum-shell-output{
+            margin: 0px;
+            padding: 0px 3px;
+            overflow-y: scroll;
+            font-size: @font-size;
+            font-family: monospace;
+            border-radius: @component-border-radius;
+            border: 3px groove @inset-panel-border-color;
+            .quantum-shell-command{
+                &:before{
+                    content: '$>';
+                }
             }
-        }
-        .quantum-shell-error{
-            &:before{
-                content: '!!';
+            .quantum-shell-data{
+                &:before{
+                    content: '~~';
+                }
+            }
+            .quantum-shell-error{
+                &:before{
+                    content: '!!';
+                }
             }
         }
     }

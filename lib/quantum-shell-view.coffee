@@ -3,6 +3,8 @@ module.exports = (model) ->
     #create DOM elements
     main = document.createElement 'div'
     header = document.createElement 'h1'
+    body = document.createElement 'div'
+    btns = document.createElement 'div'
     output = document.createElement 'pre'
     input = document.createElement 'input'
     submit = document.createElement 'button'
@@ -10,19 +12,32 @@ module.exports = (model) ->
     #assign appropriate ids
     main.id = 'quantum-shell'
     header.id = 'quantum-shell-header'
+    body.id = 'quantum-shell-body'
+    btns.id = 'quantum-shell-btns'
     output.id = 'quantum-shell-output'
     input.id = 'quantum-shell-input'
     submit.id = 'quantum-shell-submit'
 
     #append children to main
     main.appendChild header
-    main.appendChild output
+    main.appendChild body
     main.appendChild input
     main.appendChild submit
+    body.appendChild btns
+    body.appendChild output
+
+    #assign proper classes
+
 
     #set text to be displayed
     header.innerHTML = "QUANTUM SHELL v-#{model.version}"
     submit.innerHTML = 'ENTER'
+    btns.innerHTML =
+        '''
+        <button class="btn btn-primary icon-terminal selected inline-block-tight"></button>
+        <button class="btn btn-primary icon-terminal inline-block-tight"></button>
+        <button class="btn btn-success icon-plus inline-block-tight"></button>
+        '''
     output.innerHTML =
         '''
         <div class='text-info'><em>Welcome to Quantum Shell!
