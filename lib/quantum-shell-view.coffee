@@ -3,7 +3,6 @@ module.exports = (model) ->
     #create DOM elements
     main = document.createElement 'div'
     header = document.createElement 'h1'
-    body = document.createElement 'div'
     btns = document.createElement 'div'
     output = document.createElement 'pre'
     input = document.createElement 'input'
@@ -12,7 +11,6 @@ module.exports = (model) ->
     #assign appropriate ids
     main.id = 'quantum-shell'
     header.id = 'quantum-shell-header'
-    body.id = 'quantum-shell-body'
     btns.id = 'quantum-shell-btns'
     output.id = 'quantum-shell-output'
     input.id = 'quantum-shell-input'
@@ -20,23 +18,25 @@ module.exports = (model) ->
 
     #append children to main
     main.appendChild header
-    main.appendChild body
+    main.appendChild btns
+    main.appendChild output
     main.appendChild input
     main.appendChild submit
-    body.appendChild btns
-    body.appendChild output
-
-    #assign proper classes
-
 
     #set text to be displayed
     header.innerHTML = "QUANTUM SHELL v-#{model.version}"
     submit.innerHTML = 'ENTER'
     btns.innerHTML =
         '''
-        <button class="btn btn-primary icon-terminal selected inline-block-tight"></button>
-        <button class="btn btn-primary icon-terminal inline-block-tight"></button>
-        <button class="btn btn-success icon-plus inline-block-tight"></button>
+        <span class="btn-group inline-block-tight">
+            <button class="btn btn-primary icon-terminal"></button>
+            <button class="btn btn-primary icon-terminal selected"></button>
+            <button class="btn btn-primary icon-terminal"></button>
+        </span>
+        <span class="btn-group inline-block-tight">
+            <button class="btn btn-success icon-plus"></button>
+            <button class="btn btn-error icon-dash"></button>
+        </span>
         '''
     output.innerHTML =
         '''
