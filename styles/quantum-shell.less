@@ -8,7 +8,7 @@
     font-family: @font-family;
     border: 3px groove @base-border-color;
     background-color: @base-background-color;
-    #quantum-shell-header{
+    #quantum-shell-title{
         margin: 0px;
         font-weight: bold;
         text-align: center;
@@ -27,28 +27,30 @@
             padding-top:4px;
         }
     }
-    #quantum-shell-output{
-        margin: 0px;
-        padding: 0px 3px;
-        overflow-y: scroll;
+    #quantum-shell-body{
         font-size: @font-size;
         font-family: monospace;
         border-radius: @component-border-radius;
         border: 3px groove @inset-panel-border-color;
         background-color: @inset-panel-background-color;
-        .quantum-shell-command{
-            &:before{
-                content: '$>';
+        pre{
+            margin: 0px;
+            padding: 0px 3px;
+            overflow-y: scroll;
+            .quantum-shell-command{
+                &:before{
+                    content: '$>';
+                }
             }
-        }
-        .quantum-shell-data{
-            &:before{
-                content: '~~';
+            .quantum-shell-data{
+                &:before{
+                    content: '~~';
+                }
             }
-        }
-        .quantum-shell-error{
-            &:before{
-                content: '!!';
+            .quantum-shell-error{
+                &:before{
+                    content: '!!';
+                }
             }
         }
     }

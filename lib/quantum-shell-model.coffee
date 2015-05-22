@@ -19,6 +19,73 @@ class QuantumShellModel
     #class attributes
     version: require(path.join(__dirname, '../package.json'))['version']
     builtins: RegExp '(^' + sh.list.join('$|^') + '$|^' + bash.list.join('$|^') + '$|^' + custom.list.join('$|^') + '$)'
+    commands: {}
+    paths = (process.env.PATH or process.env.Path or '').split path.delimiter
+    for p in paths
+        fs.readdir p, (err, binaries) =>
+            if err then return console.error err
+            for binary in binaries
+                @::commands[binary] = true
+    for command in sh.list
+        @::commands[command] = true
+    for command in bash.list
+        @::commands[command] = true
+    for command in custom.list
+        @::commands[command] = true
+
+    #DOM elements
+    view: document.createElement 'div'
+    title: document.createElement 'h1'
+    btns: document.createElement 'div'
+    controls: document.createElement 'span'
+    icons: document.createElement 'span'
+    addTerminal: document.createElement 'button'
+    removeTerminal: document.createElement 'button'
+    body: document.createElement 'div'
+    input: document.createElement 'input'
+    submit: document.createElement 'button'
+
+    #assign ids
+    @::view.id = 'quantum-shell'
+    @::title.id = 'quantum-shell-title'
+    @::btns.id = 'quantum-shell-btns'
+    @::body.id = 'quantum-shell-body'
+    @::input.id = 'quantum-shell-input'
+    @::submit.id = 'quantum-shell-submit'
+
+    #assign types
+    @::input.type = 'text'
+    @::submit.type = 'button'
+    @::addTerminal.type = 'button'
+    @::removeTerminal.type = 'button'
+
+    #assign innerHTML
+    @::submit.innerHTML = 'ENTER'
+    @::title.innerHTML = "QUANTUM SHELL v-#{@::version}"
+
+    #assign classes
+    @::controls.classList.add 'btn-group'
+    @::controls.classList.add 'inline-block-tight'
+    @::icons.classList.add 'btn-group'
+    @::icons.classList.add 'inline-block-tight'
+    @::addTerminal.classList.add 'btn'
+    @::addTerminal.classList.add 'btn-success'
+    @::addTerminal.classList.add 'icon-plus'
+    @::removeTerminal.classList.add 'btn'
+    @::removeTerminal.classList.add 'btn-error'
+    @::removeTerminal.classList.add 'icon-dash'
+
+    #append children
+    @::view.appendChild @::title
+    @::view.appendChild @::btns
+    @::view.appendChild @::body
+    @::view.appendChild @::input
+    @::view.appendChild @::submit
+    @::btns.appendChild @::controls
+    @::btns.appendChild @::icons
+    @::controls.appendChild @::addTerminal
+    @::controls.appendChild @::removeTerminal
+
 
     constructor: (state = {}) ->
         #HTML escape transformation
@@ -30,42 +97,37 @@ class QuantumShellModel
         @dataStream = through(escape)
         @errorStream = through(escape)
 
+        #DOM elements
+        @icon = document.createElement 'button'
+        @icon.model = this
+        @icon.classList.add 'btn'
+        @icon.classList.add 'btn-primary'
+        @icon.classList.add 'icon-terminal'
+        @icon.classList.add 'selected' if state.isActive
+        @icons.appendChild @icon
+
+        @output = document.createElement 'pre'
+        @output.innerHTML =
+            '''
+            <div class='text-info'><em>Welcome to Quantum Shell!
+            Github repository: <a href='http://github.com/sedabull/quantum-shell'>sedabull/quantum-shell</a>
+            Written by Seth David Bullock (sedabull@gmail.com)
+            All questions, comments, bug reports, and pull requests are welcome!</em></div>
+            '''
+        if state.isActive
+            while @body.firstChild
+                @body.removeChild @body.firstChild
+            @body.appendChild @output
+
         #state attributes
         @history = state.history or []
         @history.pos = -1
         @history.dir = ''
         @history.temp = ''
-        @commands = state.commands or null
-        @fileNames = state.fileNames or null
         @aliases = state.aliases or {}
         @lwd = state.lwd or atom.config.get('quantum-shell.home')
         @pwd = state.pwd or atom.project.getPaths()[0] or atom.config.get('quantum-shell.home')
         @env = state.env or _.clone process.env
-
-        #build a map of commands for tab-completion
-        unless @commands?
-            @commands = {}
-            PATHS = (@env.PATH or @env.Path or '').split path.delimiter
-            for PATH in PATHS
-                fs.readdir PATH, (err, binaries) =>
-                    if err then return console.error err
-                    for binary in binaries
-                        @commands[binary] = true
-            for command in sh.list
-                @commands[command] = true
-            for command in bash.list
-                @commands[command] = true
-            for command in custom.list
-                @commands[command] = true
-
-        #build a map of fileNames for tab-completion
-        unless @fileNames
-            @fileNames = {}
-            fs.readdir @pwd, (err, files) =>
-                if err then return console.error err
-                for file in files
-                    @fileNames[file] = true
-
 
         #return output to the user
         @dataStream.on 'data', (chunk) =>
@@ -89,16 +151,24 @@ class QuantumShellModel
         @errorStream.on 'error', (error) ->
             console.log "QUANTUM SHELL ERROR STREAM ERROR: #{error}"
 
+    activate: ->
+        @icon.classList.add 'selected'
+        while @body.firstChild
+            @body.removeChild @body.firstChild
+        @body.appendChild @output
+
+    deactivate: ->
+        @icon.classList.remove 'selected'
+
     serialize: ->
         pwd: @pwd
         lwd: @lwd
         env: @env
         history: @history
         aliases: @aliases
-        commands: @commands
-        fileNames: @fileNames
 
     destroy: ->
+        @deactivate()
         @child?.kill()
         @dataStream.end()
         @errorStream.end()

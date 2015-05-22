@@ -33,19 +33,9 @@ module.exports =
                 @lwd = @pwd
                 @pwd = atom.config.get('quantum-shell.home')
                 @input.placeholder = @promptString(atom.config.get('quantum-shell.PS'))
-                fs.readdir @pwd, (error, files) =>
-                    if error then return console.log "QUANTUM SHELL CD ERROR: #{error}"
-                    @fileNames = {}
-                    for file in files
-                        @fileNames[file] = true
             else if tokens[1] is '-'
                 [@pwd, @lwd] = [@lwd, @pwd]
                 @input.placeholder = @promptString(atom.config.get('quantum-shell.PS'))
-                fs.readdir @pwd, (error, files) =>
-                    if error then return console.log "QUANTUM SHELL CD ERROR: #{error}"
-                    @fileNames = {}
-                    for file in files
-                        @fileNames[file] = true
             else
                 dir = path.resolve @pwd, tokens[1].replace '~', atom.config.get('quantum-shell.home')
                 fs.stat dir, (error, stats) =>
@@ -60,11 +50,6 @@ module.exports =
                                 ls = exec "ls", cwd: dir, env: @env
                                 [@lwd, @pwd] = [@pwd, dir]
                                 @input.placeholder = @promptString(atom.config.get('quantum-shell.PS'))
-                                fs.readdir @pwd, (error, files) =>
-                                    if error then return console.log "QUANTUM SHELL CD ERROR: #{error}"
-                                    @fileNames = {}
-                                    for file in files
-                                        @fileNames[file] = true
                             catch error
                                 if error.errno is 'EACCES'
                                     @errorStream.write "quantum-shell: cd: #{tokens[1]} permission denied"
