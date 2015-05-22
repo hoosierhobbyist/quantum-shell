@@ -190,7 +190,7 @@ class QuantumShellModel
             .replace(/\\#/g, @commandNum)
             .replace(/\\h/g, if '.' in os.hostname() then os.hostname.slice(0, os.indexOf('.')) else os.hostname())
             .replace(/\\H/g, os.hostname())
-            .replace(/\\s/g, path.basename(atom.config.get('quantum-shell.shell')))
+            .replace(/\\s/g, path.basename(@shell))
             .replace(/\\u/g, atom.config.get('quantum-shell.user'))
             .replace(/\\v/g, @version.slice(0, @version.lastIndexOf('.')))
             .replace(/\\V/g, @version)
@@ -201,6 +201,7 @@ class QuantumShellModel
             .replace(/\\T/g, time('\\T'))
             .replace(/\\@/g, time('\\@'))
             .replace(/\\A/g, time('\\A'))
+            .replace(/\\/g, '')
             .replace('\0', '\\')
 
     process: (input) ->
