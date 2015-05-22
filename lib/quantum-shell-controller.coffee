@@ -60,7 +60,7 @@ module.exports = QuantumShellController =
             type: 'string'
             default: process.env.SHELL or '/bin/sh' or ''
             title: 'Shell Name'
-            description: 'The shell you would like to execute all non-builtin commands'
+            description: 'The shell you would like to execute all non-builtin commands. You must create a new terminal to start using it.'
         PS:
             type: 'string'
             default: '\\u@atom:\\w\\$'
