@@ -1,5 +1,6 @@
 #node core
 fs = require 'fs'
+os = require 'os'
 path = require 'path'
 {exec, spawn} = require 'child_process'
 #node modules
@@ -17,9 +18,11 @@ custom = require './builtins/custom'
 #primary model class
 class QuantumShellModel
     #class attributes
+    commands: {}
     version: require(path.join(__dirname, '../package.json'))['version']
     builtins: RegExp '(^' + sh.list.join('$|^') + '$|^' + bash.list.join('$|^') + '$|^' + custom.list.join('$|^') + '$)'
-    commands: {}
+
+    #populate commands hash
     paths = (process.env.PATH or process.env.Path or '').split path.delimiter
     for p in paths
         fs.readdir p, (err, binaries) =>
@@ -119,13 +122,18 @@ class QuantumShellModel
                 @body.removeChild @body.firstChild
             @body.appendChild @output
 
-        #state attributes
+        #history data
         @history = state.history or []
         @history.pos = -1
         @history.dir = ''
         @history.temp = ''
+        @history.num = state.historyNum or @history.length + 1
+
+        #other attributes
+        @commandNum = 1
         @aliases = state.aliases or {}
         @lwd = state.lwd or atom.config.get('quantum-shell.home')
+        @shell = state.shell or atom.config.get('quantum-shell.shell')
         @pwd = state.pwd or atom.project.getPaths()[0] or atom.config.get('quantum-shell.home')
         @env = state.env or _.clone process.env
 
@@ -164,11 +172,12 @@ class QuantumShellModel
         pwd: @pwd
         lwd: @lwd
         env: @env
+        shell: @shell
         history: @history
         aliases: @aliases
+        historyNum: @history.num
 
     destroy: ->
-        @deactivate()
         @child?.kill()
         @dataStream.end()
         @errorStream.end()
@@ -176,6 +185,11 @@ class QuantumShellModel
     promptString: (input) ->
         input
             .replace(/\\\\/g, '\0')
+            .replace(/\\\$/g, if process.getuid() then '$' else '#')
+            .replace(/\\!/g, @history.num)
+            .replace(/\\#/g, @commandNum)
+            .replace(/\\h/g, if '.' in os.hostname() then os.hostname.slice(0, os.indexOf('.')) else os.hostname())
+            .replace(/\\H/g, os.hostname())
             .replace(/\\s/g, path.basename(atom.config.get('quantum-shell.shell')))
             .replace(/\\u/g, atom.config.get('quantum-shell.user'))
             .replace(/\\v/g, @version.slice(0, @version.lastIndexOf('.')))
@@ -194,10 +208,12 @@ class QuantumShellModel
         tokenizer = /('[^']+'|"[^"]+"|[^'"\s]+)/g
 
         #adjust the history queue
+        @commandNum += 1
         @history.pos = -1
         @history.dir = ''
         @history.temp = ''
         unless input is @history[0]
+            @history.num += 1
             unless @history.unshift(input) <= atom.config.get('quantum-shell.maxHistory')
                 @history.pop()
 
@@ -230,7 +246,7 @@ class QuantumShellModel
         #prevent overriding existing child
         unless @child
             #new ChildProcess instance
-            @child = exec input, cwd: @pwd, env: @env, shell: atom.config.get('quantum-shell.shell')
+            @child = exec input, cwd: @pwd, env: @env, shell: @shell
             #pipe newline seperated output back to the user
             @child.stdout.pipe(split()).pipe @dataStream, end: false
             @child.stderr.pipe(split()).pipe @errorStream, end: false
@@ -253,7 +269,7 @@ class QuantumShellModel
             #seperate command
             cmd = args.shift()
             #new child process instance
-            @child = spawn cmd, args, cwd: @pwd, env: @env, detached: true, shell: atom.config.get('quantum-shell.shell')
+            @child = spawn cmd, args, cwd: @pwd, env: @env, detached: true, shell: @shell
             #pipe newline seperated output back to the user
             @child.stdout.pipe(split()).pipe @dataStream, end: false
             @child.stderr.pipe(split()).pipe @errorStream, end: false

@@ -15,7 +15,7 @@ module.exports =
         if tokens[0] is 'history'
             len = @history.length - 1
             for i in [len..0] by -1
-                j = len - i
+                j = @history.num - i - 1
                 @dataStream.write "#{j}: #{@history[i]}"
             return
         else

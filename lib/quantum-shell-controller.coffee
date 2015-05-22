@@ -4,7 +4,7 @@ path = require 'path'
 QuantumShellModel = require './quantum-shell-model'
 
 #closures
-intID = null
+PS_ID = null
 lastPane = null
 tabInput = null
 tabMatches = []
@@ -63,9 +63,9 @@ module.exports = QuantumShellController =
             description: 'The shell you would like to execute all non-builtin commands'
         PS:
             type: 'string'
-            default: '\\u@atom:\\w$'
+            default: '\\u@atom:\\w\\$'
             title: 'Prompt String'
-            description: 'The string that will act as a placeholder for the input field. Supports basic bash-like expansion (\\@,\\A,\\d,\\t,\\T,\\s,\\u,\\v,\\V,\\w,\\W,\\\\)'
+            description: 'The string that will act as a placeholder for the input field. Supports basic bash-like expansion (\\!,\\@,\\#,\\$,\\A,\\d,\\h,\\H,\\t,\\T,\\s,\\u,\\v,\\V,\\w,\\W,\\\\)'
         enableBuiltins:
             type: 'boolean'
             default: true
@@ -90,7 +90,7 @@ module.exports = QuantumShellController =
                 @activeModel = @models[@models.length-1]
                 @activeModel.icon.onclick = switchTerminals
             else
-                atom.notifications.addError "quantum-shell: Terminal limit reached. To change this setting please go to 'Settings>Packages>quantum-shell'"
+                atom.notifications.addError "quantum-shell: Terminal limit reached"
             @activeModel.input.focus()
         QuantumShellModel::removeTerminal.onclick = =>
             if @models.length > 1
@@ -153,7 +153,7 @@ module.exports = QuantumShellController =
     deactivate: ->
         @panel.destroy()
         @subscriptions.dispose()
-        if intID then clearInterval intID
+        if PS_ID then clearInterval PS_ID
         for model in @models
             model.destroy()
 
@@ -170,12 +170,12 @@ module.exports = QuantumShellController =
         if @panel.isVisible()
             @panel.hide()
             lastPane.activate()
-            clearInterval intID
+            clearInterval PS_ID
         else
             lastPane = atom.workspace.getActivePane()
             @panel.show()
             @activeModel.input.focus()
-            intID = setInterval (=> @activeModel.input.placeholder = @activeModel.promptString(atom.config.get('quantum-shell.PS'))), 100
+            PS_ID = setInterval (=> @activeModel.input.placeholder = @activeModel.promptString(atom.config.get('quantum-shell.PS'))), 100
 
     killProcess: ->
         if @activeModel.child?
