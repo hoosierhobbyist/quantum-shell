@@ -15,6 +15,7 @@ switchTerminals = ->
         QuantumShellController.activeModel.deactivate()
         QuantumShellController.activeModel = @model
         QuantumShellController.activeModel.input.focus()
+        QuantumShellController.activeModel.output.scrollTop = Infinity
 
 module.exports = QuantumShellController =
     models: []
@@ -90,7 +91,8 @@ module.exports = QuantumShellController =
                 @activeModel = @models[@models.length-1]
                 @activeModel.icon.onclick = switchTerminals
             else
-                atom.notifications.addError "quantum-shell: Terminal limit reached"
+                atom.notifications.addError "quantum-shell: Terminal limit reached",
+                    detail: 'To change this value go to\nSettings>Packages>quantum-shell>MaxTerminals'
             @activeModel.input.focus()
         QuantumShellModel::removeTerminal.onclick = =>
             if @models.length > 1
@@ -104,6 +106,7 @@ module.exports = QuantumShellController =
                     @models[@models.length-2].activate()
                     @activeModel = @models[@models.length-2]
                 @models.splice index, 1
+                @activeModel.output.scrollTop = Infinity
             else
                 atom.notifications.addError "quantum-shell: There must always be at least one terminal"
             @activeModel.input.focus()
