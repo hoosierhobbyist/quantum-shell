@@ -12,30 +12,36 @@ module.exports =
     '~pwd': (tokens) ->
         if tokens[0] is 'pwd'
             @dataStream.write @pwd
+            return 0
         else
             @errorStream.write "quantum-shell: pwd: internal error - expected '#{tokens[0]}' to be 'pwd'"
+            return 1
 
     '~export': (tokens) ->
         if tokens[0] is 'export'
             if tokens.length != 4
                 @errorStream.write "quantum-shell: export: invalid input"
+                return 1
             else
                 if tokens[2] is '='
                     @env[tokens[1]] = tokens[3]
+                    return 0
                 else
                     @errorStream.write "quantum-shell: export: missing '=' after environment variable name"
+                    return 1
         else
             @errorStream.write "quantum-shell: export: internal error - expected '#{tokens[0]} to be 'export'"
+            return 1
 
     '~cd': (tokens) ->
         if tokens[0] is 'cd'
             if tokens.length is 1
                 @lwd = @pwd
                 @pwd = atom.config.get('quantum-shell.home')
-                @input.placeholder = @promptString(atom.config.get('quantum-shell.PS'))
+                return 0
             else if tokens[1] is '-'
                 [@pwd, @lwd] = [@lwd, @pwd]
-                @input.placeholder = @promptString(atom.config.get('quantum-shell.PS'))
+                return 0
             else
                 dir = path.resolve @pwd, tokens[1].replace '~', atom.config.get('quantum-shell.home')
                 fs.stat dir, (error, stats) =>
@@ -43,19 +49,25 @@ module.exports =
                         if error.code is 'ENOENT'
                             @errorStream.write "quantum-shell: cd: no such file or directory"
                         else
-                            console.log "QUANTUM SHELL CD ERROR: #{error}"
+                            atom.notifications.addError "quantum-shell: cd: unexpected error",
+                                detail: error.stack
+                        return 1
                     else
                         if stats.isDirectory()
                             try
                                 ls = exec "ls", cwd: dir, env: @env
                                 [@lwd, @pwd] = [@pwd, dir]
-                                @input.placeholder = @promptString(atom.config.get('quantum-shell.PS'))
+                                return 0
                             catch error
                                 if error.errno is 'EACCES'
                                     @errorStream.write "quantum-shell: cd: #{tokens[1]} permission denied"
                                 else
-                                    console.log "QUANTUM SHELL CD ERROR: #{error}"
+                                    atom.notifications.addError "quantum-shell: cd: unexpected error",
+                                        detail: error.stack
+                                return 1
                         else
                             @errorStream.write "quantum-shell: cd: #{tokens[1]} is not a directory"
+                            return 1
         else
             @errorStream.write "quantum-shell: cd: internal error - expected '#{tokens[0]}' to be 'cd'"
+            return 1

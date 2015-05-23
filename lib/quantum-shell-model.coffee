@@ -235,8 +235,16 @@ class QuantumShellModel
         if @builtins.test(tokens[0]) and atom.config.get('quantum-shell.enableBuiltins')
             builtin = tokens[0]
             if @['~' + builtin]?
-                @['~' + builtin].call this, tokens
+                code = @['~' + builtin].call this, tokens
+                unless code
+                    @setSuccess()
+                    @pending = setTimeout (=> @clearSuccess()), 2000
+                else
+                    @setError()
+                    @pending = setTimeout (=> @clearError()), 2000
             else
+                @setError()
+                @pending = setTimeout (=> @clearError()), 2000
                 @errorStream.write "quantum-shell: builtin: [#{builtin}] has yet to be implemented"
                 @errorStream.write "For more information please see the issue at http://github.com/sedabull/quantum-shell/issues/1"
 
