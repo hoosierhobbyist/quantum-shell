@@ -130,6 +130,7 @@ class QuantumShellModel
         @history.num = state.historyNum or @history.length + 1
 
         #other attributes
+        @pending = null
         @commandNum = 1
         @aliases = state.aliases or {}
         @lwd = state.lwd or atom.config.get('quantum-shell.home')
@@ -243,9 +244,45 @@ class QuantumShellModel
         else
             @exec tokens.join ' '
 
+    setWarning: ->
+        @icon.classList.remove 'btn-primary'
+        @icon.classList.remove 'btn-error'
+        @icon.classList.remove 'btn-success'
+        @icon.classList.add 'btn-warning'
+
+    setError: ->
+        @icon.classList.remove 'btn-primary'
+        @icon.classList.remove 'btn-warning'
+        @icon.classList.remove 'btn-success'
+        @icon.classList.add 'btn-error'
+
+    setSuccess: ->
+        @icon.classList.remove 'btn-primary'
+        @icon.classList.remove 'btn-warning'
+        @icon.classList.remove 'btn-error'
+        @icon.classList.add 'btn-success'
+
+    clearWarning: ->
+        @pending = null
+        @icon.classList.remove 'btn-warning'
+        @icon.classList.add 'btn-primary'
+
+    clearError: ->
+        @pending = null
+        @icon.classList.remove 'btn-error'
+        @icon.classList.add 'btn-primary'
+
+    clearSuccess: ->
+        @pending = null
+        @icon.classList.remove 'btn-success'
+        @icon.classList.add 'btn-primary'
+
     exec: (input) ->
         #prevent overriding existing child
         unless @child
+            #adjust icon display
+            if @pending then clearTimeout @pending
+            @setWarning()
             #new ChildProcess instance
             @child = exec input, cwd: @pwd, env: @env, shell: @shell
             #pipe newline seperated output back to the user
@@ -255,14 +292,22 @@ class QuantumShellModel
             @child.on 'error', (error) =>
                 @child.kill()
                 @child = null
+                @setError()
+                @pending = setTimeout (=> @clearError()), 2000
                 for line in error.toString().split /\r?\n/
                     @errorStream.write line
             #signal that another child can now be created
             @child.on 'exit', (code, signal) =>
                 @child = null
+                unless code
+                    @setSuccess()
+                    @pending = setTimeout (=> @clearSuccess()), 2000
+                else
+                    @setError()
+                    @pending = setTimeout (=> @clearError()), 2000
                 if atom.inDevMode()
-                    console.log "QUANTUM SHELL EXIT CODE: #{code}"
-                    console.log "QUANTUM SHELL EXIT SIGNAL: #{signal}"
+                    atom.notifications.addInfo "quantum-shell: exit code - #{code}"
+                    atom.notifications.addInfo "quantum-shell: exit signal - #{signal}"
 
     spawn: (args) ->
         #prevent overriding existing child
