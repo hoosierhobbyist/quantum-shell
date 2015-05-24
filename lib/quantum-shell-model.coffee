@@ -167,6 +167,7 @@ class QuantumShellModel
         @body.appendChild @output
 
     deactivate: ->
+        clearTimeout @pending if @pending
         @icon.classList.remove 'selected'
 
     serialize: ->
@@ -179,7 +180,8 @@ class QuantumShellModel
         historyNum: @history.num
 
     destroy: ->
-        @child?.kill()
+        @deactivate()
+        @child?.kill 'SIGTERM'
         @dataStream.end()
         @errorStream.end()
 
@@ -208,6 +210,10 @@ class QuantumShellModel
     process: (input) ->
         #tokenizer regular expression
         tokenizer = /('[^']+'|"[^"]+"|[^'"\s]+)/g
+
+        #adjust icon display
+        if @pending then clearTimeout @pending
+        @setWarning()
 
         #adjust the history queue
         @commandNum += 1
@@ -238,13 +244,16 @@ class QuantumShellModel
                 code = @['~' + builtin].call this, tokens
                 unless code
                     @setSuccess()
-                    @pending = setTimeout (=> @clearSuccess()), 2000
+                    @pending = setTimeout (=> @clearSuccess()), 3000
                 else
                     @setError()
-                    @pending = setTimeout (=> @clearError()), 2000
+                    @pending = setTimeout (=> @clearError()), 3000
+                if atom.config.get 'quantum-shell.debug'
+                    atom.notifications.addInfo "quantum-shell: exit code - #{code}"
+                    atom.notifications.addInfo "quantum-shell: exit signal - null"
             else
                 @setError()
-                @pending = setTimeout (=> @clearError()), 2000
+                @pending = setTimeout (=> @clearError()), 3000
                 @errorStream.write "quantum-shell: builtin: [#{builtin}] has yet to be implemented"
                 @errorStream.write "For more information please see the issue at http://github.com/sedabull/quantum-shell/issues/1"
 
@@ -288,9 +297,6 @@ class QuantumShellModel
     exec: (input) ->
         #prevent overriding existing child
         unless @child
-            #adjust icon display
-            if @pending then clearTimeout @pending
-            @setWarning()
             #new ChildProcess instance
             @child = exec input, cwd: @pwd, env: @env, shell: @shell
             #pipe newline seperated output back to the user
@@ -301,7 +307,7 @@ class QuantumShellModel
                 @child.kill()
                 @child = null
                 @setError()
-                @pending = setTimeout (=> @clearError()), 2000
+                @pending = setTimeout (=> @clearError()), 3000
                 for line in error.toString().split /\r?\n/
                     @errorStream.write line
             #signal that another child can now be created
@@ -309,11 +315,11 @@ class QuantumShellModel
                 @child = null
                 unless code
                     @setSuccess()
-                    @pending = setTimeout (=> @clearSuccess()), 2000
+                    @pending = setTimeout (=> @clearSuccess()), 3000
                 else
                     @setError()
-                    @pending = setTimeout (=> @clearError()), 2000
-                if atom.inDevMode()
+                    @pending = setTimeout (=> @clearError()), 3000
+                if atom.config.get 'quantum-shell.debug'
                     atom.notifications.addInfo "quantum-shell: exit code - #{code}"
                     atom.notifications.addInfo "quantum-shell: exit signal - #{signal}"
 

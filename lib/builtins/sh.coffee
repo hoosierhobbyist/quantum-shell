@@ -1,6 +1,8 @@
 fs = require 'fs'
 path = require 'path'
 {exec} = require 'child_process'
+checkPerm = require '../util/checkPerm'
+{U_EX, G_EX, W_EX} = checkPerm
 
 module.exports =
     list:
@@ -44,30 +46,27 @@ module.exports =
                 return 0
             else
                 dir = path.resolve @pwd, tokens[1].replace '~', atom.config.get('quantum-shell.home')
-                fs.stat dir, (error, stats) =>
-                    if error
-                        if error.code is 'ENOENT'
-                            @errorStream.write "quantum-shell: cd: no such file or directory"
+                try
+                    stats = fs.statSync dir
+                    if stats.isDirectory()
+                        if checkPerm(stats.mode, W_EX) or
+                        (stats.uid is process.getuid() and checkPerm(stats.mode, U_EX)) or
+                        (stats.gid in process.getgroups() and checkPerm(stats.mode, G_EX))
+                            [@lwd, @pwd] = [@pwd, dir]
+                            return 0
                         else
-                            atom.notifications.addError "quantum-shell: cd: unexpected error",
-                                detail: error.stack
-                        return 1
-                    else
-                        if stats.isDirectory()
-                            try
-                                ls = exec "ls", cwd: dir, env: @env
-                                [@lwd, @pwd] = [@pwd, dir]
-                                return 0
-                            catch error
-                                if error.errno is 'EACCES'
-                                    @errorStream.write "quantum-shell: cd: #{tokens[1]} permission denied"
-                                else
-                                    atom.notifications.addError "quantum-shell: cd: unexpected error",
-                                        detail: error.stack
-                                return 1
-                        else
-                            @errorStream.write "quantum-shell: cd: #{tokens[1]} is not a directory"
+                            @errorStream.write "quantum-shell: cd: #{tokens[1]}: permission denied"
                             return 1
+                    else
+                        @errorStream.write "quantum-shell: cd: #{tokens[1]}: not a directory"
+                        return 1
+                catch error
+                    if error.code is 'ENOENT'
+                        @errorStream.write "quantum-shell: cd: #{tokens[1]}: no such file or directory"
+                    else
+                        atom.notifications.addError "quantum-shell: cd: unexpected error",
+                            detail: error.stack
+                    return 1
         else
             @errorStream.write "quantum-shell: cd: internal error - expected '#{tokens[0]}' to be 'cd'"
             return 1

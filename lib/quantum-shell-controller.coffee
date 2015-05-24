@@ -23,6 +23,11 @@ module.exports = QuantumShellController =
     activeModel: null
     subscriptions: null
     config:
+        debug:
+            type: 'boolean'
+            default: false
+            title: 'Debug Child Processes'
+            description: 'When checked, standard atom notifications will appear indicating a process\'s exit code and signal'
         home:
             type: 'string'
             default: process.env.HOME or atom.config.get('core.projectHome') or ''
@@ -182,7 +187,7 @@ module.exports = QuantumShellController =
 
     killProcess: ->
         if @activeModel.child?
-            @activeModel.child.kill()
+            @activeModel.child.kill 'SIGTERM'
             @activeModel.child = null
             @activeModel.errorStream.write '^C'
 
