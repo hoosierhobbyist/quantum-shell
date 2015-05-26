@@ -79,6 +79,9 @@ module.exports = QuantumShellController =
             description: 'Enable and give precedence to custom quantum-shell builtin commands (highly recommended)'
 
     activate: (state = {}) ->
+        #handle old serialized state
+        if state.modelState?
+            state.models = [state.modelState]
         #setup event handlers
         QuantumShellModel::submit.onclick = =>
             cmd = document.createElement 'div'
