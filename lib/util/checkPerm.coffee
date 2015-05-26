@@ -1,5 +1,3 @@
-fs = require 'fs'
-
 module.exports = (mode, mask) ->
     if mask in [256, 128, 64]
         mask >>= 6
