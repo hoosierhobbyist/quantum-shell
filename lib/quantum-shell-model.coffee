@@ -166,8 +166,9 @@ class QuantumShellModel
             @body.removeChild @body.firstChild
         @body.appendChild @output
 
-    deactivate: ->
-        clearTimeout @pending if @pending
+    deactivate: (clear = true) ->
+        if @pending and clear
+            clearTimeout @pending
         @icon.classList.remove 'selected'
 
     serialize: ->

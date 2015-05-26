@@ -12,7 +12,7 @@ tabMatches.index = 0
 switchTerminals = ->
     unless @model is QuantumShellController.activeModel
         @model.activate()
-        QuantumShellController.activeModel.deactivate()
+        QuantumShellController.activeModel.deactivate false
         QuantumShellController.activeModel = @model
         QuantumShellController.activeModel.input.focus()
         QuantumShellController.activeModel.output.scrollTop = Infinity
@@ -92,7 +92,7 @@ module.exports = QuantumShellController =
         QuantumShellModel::addTerminal.onclick = =>
             if @models.length < atom.config.get 'quantum-shell.maxTerminals'
                 @models.push new QuantumShellModel {isActive: true}
-                @activeModel.deactivate()
+                @activeModel.deactivate false
                 @activeModel = @models[@models.length-1]
                 @activeModel.icon.onclick = switchTerminals
             else
