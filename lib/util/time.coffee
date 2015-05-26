@@ -72,9 +72,9 @@ module.exports = (input) ->
                     '' + (now.getHours() - 12)
             suffix =
                 if now.getHours() < 12
-                    'a.m.'
+                    'AM'
                 else
-                    'p.m.'
+                    'PM'
             "#{hours}:#{minutes} #{suffix}"
         when '\\A'
             hours =
@@ -84,9 +84,9 @@ module.exports = (input) ->
                     '' + now.getHours()
             suffix =
                 if now.getHours() < 12
-                    'a.m.'
+                    'AM'
                 else
-                    'p.m.'
+                    'PM'
             "#{hours}:#{minutes} #{suffix}"
         else
             throw new Error 'Invalid input [util/time]'
