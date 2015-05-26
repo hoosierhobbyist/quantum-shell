@@ -3,21 +3,29 @@ A command line interface built directly into Atom! This package is largely inspi
 
 ## Features
 
+### Multiple Terminals, as of v-0.6.0!
+You can now run as many terminals as you would like side by side. Each will have its own unique history, aliases, environment and even underlying shell program! To run different shells next to one another, simply navigate to `Settings>Packages>quantum-shell>ShellName` and change the default. Now every *new* terminal you create will use that shell program until you destroy it. Even if you close Atom all the way down and restart it, you're settings will be preserved and you can continue to simultaneously run as many different shells as you would like!
+
 ### Full `history` support just like you're used to in bash
-Just use the `up` and `down` arrow keys when the input field is focused to quickly navigate through your history, or use the `history` builtin to view a list of your past commands. A configuration option for limiting the number of commands to record can now be found under `Settings>Packages>quantum-shell>Maximum History`. The default is 100.
+Just use the `up` and `down` arrow keys when the input field is focused to quickly navigate through your history, or use the `history` builtin to view a list of your past commands. A configuration option for limiting the number of commands to record can now be found under `Settings>Packages>quantum-shell>MaxHistory`. The default is 100.
 
 ### Rotating Tab Completion
 At the request of user [@clebrun](http://github.com/clebrun), I have added a rotating tab completion feature! The way it works is simple. If you have not yet pressed the space-bar, pressing the `tab` key will cause `quantum-shell` to rotate through all of the program names referenced in your $PATH variable (including `quantum-shell` builtins) that match what you have already typed. If you have pressed the space-bar (meaning that you are working on typing word number two or higher), pressing the `tab` key will rotate through all of the file names along the relative path you have typed. This is a very exciting new feature, so please feel free to share any comments and/or bugs that you might discover!
 
 ### Customizable Prompt String
-The prompt string is one of the defining features of any good shell program, and up until now   `quantum-shell`'s has been rather bland, and hard-coded into the program. But that is no more! From now on, anyone using `quantum-shell` can customize their own prompt string under `Settings>Packages>quantum-shell>Prompt String`. Not only that, but I've included semantics for several special escape characters as outlined below:
+The prompt string is one of the defining features of any good shell program, and up until now   `quantum-shell`'s has been rather bland, and hard-coded into the program. But that is no more! From now on, anyone using `quantum-shell` can customize their own prompt string under `Settings>Packages>quantum-shell>PromptString`. Not only that, but I've included semantics for several special escape characters as outlined below:
+* `\\!` - the current history number of this command
 * `\@` - current time in 12-hour `HH:MM {am,pm}` format
+* `\\#` - the current command number of this command
+* `\\$` - a `#` if superuser, `$` otherwise
 * `\A` - current time in 24-hour `HH:MM {am,pm}` format
 * `\d` - current date in `Weekday Month Date` format
+* `\\h` - the current hostname up to the first `.`
+* `\\H` - the current hostname
 * `\s` - the shell program used to run all non-builtin commands
 * `\t` - current time in 24-hour `HH:MM:SS` format
 * `\T` - current time in 12-hour `HH:MM:SS` format
-* `\u` - the user's username
+* `\u` - the user's preferred username
 * `\v` - the current version of `quantum-shell` in `X.Y` format
 * `\V` - the current version of `quantum-shell` in `X.Y.Z` format
 * `\w` - the full path of the current working directory

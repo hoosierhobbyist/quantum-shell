@@ -1,3 +1,14 @@
+## 0.6.0 - Multiple Terminals
+* added simple return codes to builtin commands
+* added config options `debug child processes` and `max terminals`
+* added prompt string semantics
+    * `\\$` - a `#` if superuser, `$` otherwise
+    * `\\!` - the current history number of this command
+    * `\\#` - the current command number of this command
+    * `\\h` - the current hostname up to the first `.`
+    * `\\H` - the current hostname
+* now supports multiple terminals simultaneously running different shells
+
 ## 0.5.0 - Customization
 * `quantum-shell:kill-process` will now write `^C` to the error stream
 * tab-completion will now provide filename completions along a relative path
