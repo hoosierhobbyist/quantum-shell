@@ -81,6 +81,7 @@ module.exports = QuantumShellController =
     activate: (state = {}) ->
         #handle old serialized state
         if state.modelState?
+            state.modelState.isActive = true
             state.models = [state.modelState]
         #setup event handlers
         QuantumShellModel::submit.onclick = =>
@@ -141,6 +142,7 @@ module.exports = QuantumShellController =
             @models.push new QuantumShellModel {isActive: true}
             @activeModel = @models[0]
             @activeModel.icon.onclick = switchTerminals
+        @activeModel = @models[0] unless @activeModel?
         @panel = atom.workspace.addBottomPanel item: @activeModel.view, visible: false
 
         #observe changes
