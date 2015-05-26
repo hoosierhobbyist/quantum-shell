@@ -8,7 +8,7 @@
     font-family: @font-family;
     border: 3px groove @base-border-color;
     background-color: @base-background-color;
-    #quantum-shell-header{
+    #quantum-shell-title{
         margin: 0px;
         font-weight: bold;
         text-align: center;
@@ -17,30 +17,40 @@
         border: 3px groove @panel-heading-border-color;
         background-color: @panel-heading-background-color;
     }
-    #quantum-shell-output{
-        margin: 0px;
-        padding: 0px 3px;
-        //min-height: 25px;
-        //max-height: 250px;
-        overflow-y: scroll;
+    #quantum-shell-btns{
+        //padding: 3px;
+        overflow-x: auto;
+        border-radius: @component-border-radius;
+        border: 3px groove @inset-panel-border-color;
+        background-color: @inset-panel-background-color;
+        .btn{
+            padding-top:4px;
+        }
+    }
+    #quantum-shell-body{
         font-size: @font-size;
         font-family: monospace;
         border-radius: @component-border-radius;
         border: 3px groove @inset-panel-border-color;
         background-color: @inset-panel-background-color;
-        .quantum-shell-command{
-            &:before{
-                content: '$>';
+        pre{
+            margin: 0px;
+            padding: 0px 3px;
+            overflow-y: scroll;
+            .quantum-shell-command{
+                &:before{
+                    content: '$>';
+                }
             }
-        }
-        .quantum-shell-data{
-            &:before{
-                content: '~~';
+            .quantum-shell-data{
+                &:before{
+                    content: '~~';
+                }
             }
-        }
-        .quantum-shell-error{
-            &:before{
-                content: '!!';
+            .quantum-shell-error{
+                &:before{
+                    content: '!!';
+                }
             }
         }
     }
