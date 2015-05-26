@@ -64,7 +64,7 @@ module.exports = QuantumShellController =
             description: 'The minimum height, in pixels, of the shell output div'
         shell:
             type: 'string'
-            default: process.env.SHELL or '/bin/sh' or ''
+            default: process.env.SHELL or '/bin/sh'
             title: 'Shell Name'
             description: 'The shell you would like to execute all non-builtin commands. You must create a new terminal to start using it.'
         PS:
@@ -250,16 +250,20 @@ module.exports = QuantumShellController =
                 lastToken = tabInput.match(/('[^']+'|"[^"]+"|[^'"\s]+)/g).pop()
                 if RegExp(path.sep).test lastToken
                     try
-                        fileNames = fs.readdirSync path.dirname path.resolve @activeModel.pwd, lastToken
+                        directory = path.dirname path.resolve @activeModel.pwd, lastToken
+                        fileNames = fs.readdirSync directory
                         prefix = lastToken.slice 0, lastToken.lastIndexOf(path.sep) + 1
                         for fileName in fileNames
-                            if RegExp('^' + path.basename(lastToken), 'i').test fileName
+                            if RegExp("^#{path.basename(lastToken)}", 'i').test fileName
                                 tabMatches.push prefix + fileName
                     catch err
                         console.error err
                 else
-                    try fileNames = fs.readdirSync @activeModel.pwd
-                    for own fileName of fileNames
-                        if RegExp('^' + lastToken, 'i').test fileName
-                            tabMatches.push fileName
+                    try
+                        fileNames = fs.readdirSync @activeModel.pwd
+                        for fileName in fileNames
+                            if RegExp("^#{lastToken}", 'i').test fileName
+                                tabMatches.push fileName
+                    catch err
+                        console.error err
             @tabCompletion()
