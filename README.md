@@ -14,14 +14,14 @@ At the request of user [@clebrun](http://github.com/clebrun), I have added a rot
 
 ### Customizable Prompt String
 The prompt string is one of the defining features of any good shell program, and up until now   `quantum-shell`'s has been rather bland, and hard-coded into the program. But that is no more! From now on, anyone using `quantum-shell` can customize their own prompt string under `Settings>Packages>quantum-shell>PromptString`. Not only that, but I've included semantics for several special escape characters as outlined below:
-* `\\!` - the current history number of this command
+* `\!` - the current history number of this command
 * `\@` - current time in 12-hour `HH:MM {am,pm}` format
-* `\\#` - the current command number of this command
-* `\\$` - a `#` if superuser, `$` otherwise
+* `\#` - the current command number of this command
+* `\$` - a `#` if superuser, `$` otherwise
 * `\A` - current time in 24-hour `HH:MM {am,pm}` format
 * `\d` - current date in `Weekday Month Date` format
-* `\\h` - the current hostname up to the first `.`
-* `\\H` - the current hostname
+* `\h` - the current hostname up to the first `.`
+* `\H` - the current hostname
 * `\s` - the shell program used to run all non-builtin commands
 * `\t` - current time in 24-hour `HH:MM:SS` format
 * `\T` - current time in 12-hour `HH:MM:SS` format
