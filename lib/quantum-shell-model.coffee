@@ -192,7 +192,7 @@ class QuantumShellModel
             .replace(/\\\$/g, if process.getuid() then '$' else '#')
             .replace(/\\!/g, @history.num)
             .replace(/\\#/g, @commandNum)
-            .replace(/\\h/g, if '.' in os.hostname() then os.hostname.slice(0, os.indexOf('.')) else os.hostname())
+            .replace(/\\h/g, if '.' in os.hostname() then os.hostname().slice(0, os.hostname().indexOf('.')) else os.hostname())
             .replace(/\\H/g, os.hostname())
             .replace(/\\s/g, path.basename(@shell))
             .replace(/\\u/g, atom.config.get('quantum-shell.user'))
