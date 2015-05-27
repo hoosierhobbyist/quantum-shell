@@ -1,3 +1,7 @@
+## 0.6.1 - Bug Fix
+* change `a.m.` and `p.m.` to `AM` and `PM`
+* bug fix, issue [#13](http://github.com/sedabull/quantum-shell/issues/13): missing `os.hostname()` call
+
 ## 0.6.0 - Multiple Terminals
 * added simple return codes to builtin commands
 * added config options `debug child processes` and `max terminals`
