@@ -1,3 +1,7 @@
+## 0.6.2 - Bug Fix
+* proper kill signals
+* bug fix, issue [#14](http://github.com/sedabull/quantum-shell/issues/14): `process.getuid` is undefined on windows OS
+
 ## 0.6.1 - Bug Fix
 * change `a.m.` and `p.m.` to `AM` and `PM`
 * bug fix, issue [#13](http://github.com/sedabull/quantum-shell/issues/13): missing `os.hostname()` call
