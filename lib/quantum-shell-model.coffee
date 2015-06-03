@@ -182,17 +182,17 @@ class QuantumShellModel
 
     destroy: ->
         @deactivate()
-        @child?.kill 'SIGTERM'
+        @child?.kill 'SIGINT'
         @dataStream.end()
         @errorStream.end()
 
     promptString: (input) ->
         input
             .replace(/\\\\/g, '\0')
-            .replace(/\\\$/g, if process.getuid() then '$' else '#')
+            .replace(/\\\$/g, if process.platform is 'win32' or process.getuid() then '$' else '#')
             .replace(/\\!/g, @history.num)
             .replace(/\\#/g, @commandNum)
-            .replace(/\\h/g, if '.' in os.hostname() then os.hostname().slice(0, os.hostname().indexOf('.')) else os.hostname())
+            .replace(/\\h/g, if '.' in  hn = os.hostname() then hn.slice(0, hn.indexOf('.')) else hn)
             .replace(/\\H/g, os.hostname())
             .replace(/\\s/g, path.basename(@shell))
             .replace(/\\u/g, atom.config.get('quantum-shell.user'))

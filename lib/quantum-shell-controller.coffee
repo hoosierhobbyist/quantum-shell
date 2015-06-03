@@ -192,7 +192,7 @@ module.exports = QuantumShellController =
 
     killProcess: ->
         if @activeModel.child?
-            @activeModel.child.kill 'SIGTERM'
+            @activeModel.child.kill 'SIGINT'
             @activeModel.child = null
             @activeModel.errorStream.write '^C'
 
