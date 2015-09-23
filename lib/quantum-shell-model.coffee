@@ -110,6 +110,8 @@ class QuantumShellModel
         @icons.appendChild @icon
 
         @output = document.createElement 'pre'
+        @output.style.maxHeight = atom.config.get 'quantum-shell.maxHeight'
+        @output.style.minHeight = atom.config.get 'quantum-shell.minHeight'
         @output.innerHTML =
             '''
             <div class='text-info'><em>Welcome to Quantum Shell!
@@ -128,6 +130,8 @@ class QuantumShellModel
         @history.dir = ''
         @history.temp = ''
         @history.num = state.historyNum or @history.length + 1
+        if @history.length > maxHistory = atom.config.get 'quantum-shell.maxHistory'
+            @history.splice maxHistory, Infinity
 
         #other attributes
         @pending = null
