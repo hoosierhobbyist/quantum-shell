@@ -110,8 +110,8 @@ class QuantumShellModel
         @icons.appendChild @icon
 
         @output = document.createElement 'pre'
-        @output.style.maxHeight = atom.config.get 'quantum-shell.maxHeight'
-        @output.style.minHeight = atom.config.get 'quantum-shell.minHeight'
+        @output.style.maxHeight = "#{atom.config.get 'quantum-shell.maxHeight'}px"
+        @output.style.minHeight = "#{atom.config.get 'quantum-shell.minHeight'}px"
         @output.innerHTML =
             '''
             <div class='text-info'><em>Welcome to Quantum Shell!
