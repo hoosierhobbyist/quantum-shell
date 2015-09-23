@@ -29,7 +29,7 @@
   },
   "license": "MIT",
   "engines": {
-    "atom": ">=1.0.12s <2.0"
+    "atom": ">=1.0.12 <2.0"
   },
   "dependencies": {
     "split": "^0.3.2",
