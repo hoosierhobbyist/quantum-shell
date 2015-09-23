@@ -80,10 +80,14 @@ module.exports = QuantumShellController =
             description: 'Enable and give precedence to custom quantum-shell builtin commands (highly recommended)'
 
     activate: (state = {}) ->
-        #handle old serialized state
+        #handle issues from older versions of quantum-shell
         if state.modelState?
             state.modelState.isActive = true
             state.models = [state.modelState]
+        if atom.config.get('quantum-shell.shell') is 'cmd.exe'
+            atom.config.set 'quantum-shell.shell', ''
+            atom.config.set 'quantum-shell.user', ''
+            atom.config.set 'quantum-shell.home', ''
         #setup event handlers
         QuantumShellModel::submit.onclick = =>
             cmd = document.createElement 'div'
