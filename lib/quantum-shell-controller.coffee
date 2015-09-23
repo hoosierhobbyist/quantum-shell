@@ -1,4 +1,5 @@
 fs = require 'fs'
+os = require 'os'
 path = require 'path'
 {CompositeDisposable} = require 'atom'
 QuantumShellModel = require './quantum-shell-model'
@@ -30,7 +31,7 @@ module.exports = QuantumShellController =
             description: 'When checked, standard atom notifications will appear indicating a process\'s exit code and signal'
         home:
             type: 'string'
-            default: process.env.HOME or atom.config.get('core.projectHome') or ''
+            default: os.homedir()
             title: 'Home Directory'
             description: 'You\'re home directory. It will be replaced by a \'~\' in the prompt string and used as the default argument to the \'cd\' command.'
         user:
