@@ -36,7 +36,7 @@ module.exports = QuantumShellController =
             description: 'You\'re home directory. It will be replaced by a \'~\' in the prompt string and used as the default argument to the \'cd\' command.'
         user:
             type: 'string'
-            default: process.env.USER or 'user'
+            default: if process.platform is 'win32' then process.env.USERNAME else process.env.USER or 'user'
             title: 'User Name'
             description: 'You\'re user name. \'\\u\' in the prompt string will expand into this value.'
         maxHistory:
@@ -65,12 +65,12 @@ module.exports = QuantumShellController =
             description: 'The minimum height, in pixels, of the shell output div'
         shell:
             type: 'string'
-            default: process.env.SHELL or '/bin/sh'
+            default: if process.platform is 'win32' then 'cmd' else process.env.SHELL or '/bin/sh'
             title: 'Shell Name'
             description: 'The shell you would like to execute all non-builtin commands. You must create a new terminal to start using it.'
         PS:
             type: 'string'
-            default: '\\u@atom:\\w\\$'
+            default: if process.platform is 'win32' then '\\w\\$' else '\\u@atom:\\w\\$'
             title: 'Prompt String'
             description: 'The string that will act as a placeholder for the input field. Supports basic bash-like expansion (\\!,\\@,\\#,\\$,\\A,\\d,\\h,\\H,\\t,\\T,\\s,\\u,\\v,\\V,\\w,\\W,\\\\)'
         enableBuiltins:
@@ -157,13 +157,6 @@ module.exports = QuantumShellController =
             for model in @models
                 if model.history.length > value
                     model.history.splice value, Infinity
-
-        #windows specific setup
-        if process.platform is 'win32'
-            atom.config.set 'quantum-shell.shell', 'cmd'
-            atom.config.set 'quantum-shell.PS', '\\w\\$'
-            atom.config.set 'quantum-shell.user', process.env.USERNAME
-            atom.config.set 'quantum-shell.home', process.env.USERPROFILE
 
     deactivate: ->
         @panel.destroy()
