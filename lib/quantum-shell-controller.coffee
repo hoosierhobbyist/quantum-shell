@@ -160,6 +160,7 @@ module.exports = QuantumShellController =
         #windows specific setup
         if process.platform is 'win32'
             atom.config.set 'quantum-shell.shell', 'cmd'
+            atom.config.set 'quantum-shell.PS', '\\w\\$'
             atom.config.set 'quantum-shell.user', process.env.USERNAME
             atom.config.set 'quantum-shell.home', process.env.USERPROFILE
 
