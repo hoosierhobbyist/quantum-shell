@@ -49,7 +49,16 @@ module.exports =
                 try
                     stats = fs.statSync dir
                     if stats.isDirectory()
-                        if checkPerm(stats.mode, W_EX) or
+                        if process.platform is 'win32'
+                            try
+                                ls = exec "dir", cwd: dir, env: @env
+                                [@lwd, @pwd] = [@pwd, dir]
+                            catch error
+                                if error.errno is 'EACCES'
+                                    @errorStream.write "quantum-shell: cd: #{tokens[1]} permission denied"
+                                else
+                                    console.log "QUANTUM SHELL CD ERROR: #{error}"
+                        else if checkPerm(stats.mode, W_EX) or
                         (stats.uid is process.getuid() and checkPerm(stats.mode, U_EX)) or
                         (stats.gid in process.getgroups() and checkPerm(stats.mode, G_EX))
                             [@lwd, @pwd] = [@pwd, dir]
