@@ -1,3 +1,8 @@
+## 0.7.0 - Windows Support
+* correct Windows prompt string
+* correct default settings for Windows
+* this version requires `Atom` version 1.0.12 or higher because that is when the switch to `io.js` version 2.x was made
+
 ## 0.6.2 - Bug Fix
 * proper kill signals
 * bug fix, issue [#14](http://github.com/sedabull/quantum-shell/issues/14): `process.getuid` is undefined on windows OS

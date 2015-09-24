@@ -110,6 +110,8 @@ class QuantumShellModel
         @icons.appendChild @icon
 
         @output = document.createElement 'pre'
+        @output.style.maxHeight = "#{atom.config.get 'quantum-shell.maxHeight'}px"
+        @output.style.minHeight = "#{atom.config.get 'quantum-shell.minHeight'}px"
         @output.innerHTML =
             '''
             <div class='text-info'><em>Welcome to Quantum Shell!
@@ -128,6 +130,8 @@ class QuantumShellModel
         @history.dir = ''
         @history.temp = ''
         @history.num = state.historyNum or @history.length + 1
+        if @history.length > maxHistory = atom.config.get 'quantum-shell.maxHistory'
+            @history.splice maxHistory, Infinity
 
         #other attributes
         @pending = null
@@ -189,7 +193,7 @@ class QuantumShellModel
     promptString: (input) ->
         input
             .replace(/\\\\/g, '\0')
-            .replace(/\\\$/g, if process.platform is 'win32' or process.getuid() then '$' else '#')
+            .replace(/\\\$/g, if process.platform is 'win32' then '>' else (if process.getuid() then '$' else '#'))
             .replace(/\\!/g, @history.num)
             .replace(/\\#/g, @commandNum)
             .replace(/\\h/g, if '.' in  hn = os.hostname() then hn.slice(0, hn.indexOf('.')) else hn)
@@ -198,14 +202,14 @@ class QuantumShellModel
             .replace(/\\u/g, atom.config.get('quantum-shell.user'))
             .replace(/\\v/g, @version.slice(0, @version.lastIndexOf('.')))
             .replace(/\\V/g, @version)
-            .replace(/\\w/g, @pwd.replace(atom.config.get('quantum-shell.home'), '~'))
+            .replace(/\\w/g, @pwd.replace(home = atom.config.get('quantum-shell.home'), (if process.platform is 'win32' then home else '~')))
             .replace(/\\W/g, path.basename(@pwd.replace(atom.config.get('quantum-shell.home', '~'))))
             .replace(/\\d/g, time('\\d'))
             .replace(/\\t/g, time('\\t'))
             .replace(/\\T/g, time('\\T'))
             .replace(/\\@/g, time('\\@'))
             .replace(/\\A/g, time('\\A'))
-            .replace(/\\/g, '')
+            .replace(/\\/g, (if process.platform is 'win32' then '\\' else ''))
             .replace('\0', '\\')
 
     process: (input) ->

@@ -7,14 +7,15 @@
     "email": "sedabull@gmail.com",
     "url": "http://github.com/sedabull"
   },
-  "description": "A terminal emulator with full history, alias, and tab-completion features!",
+  "description": "A multi-platform command line interface for the Atom text editor!",
   "keywords": [
     "terminal",
     "tab-completion",
+    "Windows support"
     "alias",
     "prompt string",
     "history",
-    "customizable"
+    "command line"
   ],
   "bugs": {
     "email": "sedabull@gmail.com",
@@ -29,7 +30,7 @@
   },
   "license": "MIT",
   "engines": {
-    "atom": ">=0.174.0 <2.0"
+    "atom": ">=1.0.12 <2.0"
   },
   "dependencies": {
     "split": "^0.3.2",
