@@ -16,7 +16,7 @@ switchTerminals = ->
         QuantumShellController.activeModel.deactivate false
         QuantumShellController.activeModel = @model
         QuantumShellController.activeModel.input.focus()
-        QuantumShellController.activeModel.output.scrollTop = Infinity
+        QuantumShellController.activeModel.output.scrollTop = Number.MAX_VALUE
 
 module.exports = QuantumShellController =
     models: []
@@ -95,7 +95,7 @@ module.exports = QuantumShellController =
             cmd.classList.add 'quantum-shell-command'
             cmd.innerHTML = @activeModel.input.value
             @activeModel.output.appendChild cmd
-            @activeModel.output.scrollTop = Infinity
+            @activeModel.output.scrollTop = Number.MAX_VALUE
             @activeModel.process @activeModel.input.value
             @activeModel.input.value = ''
         QuantumShellModel::addTerminal.onclick = =>
@@ -120,7 +120,7 @@ module.exports = QuantumShellController =
                     @models[@models.length-2].activate()
                     @activeModel = @models[@models.length-2]
                 @models.splice index, 1
-                @activeModel.output.scrollTop = Infinity
+                @activeModel.output.scrollTop = Number.MAX_VALUE
             else
                 atom.notifications.addError "quantum-shell: There must always be at least one terminal"
             @activeModel.input.focus()

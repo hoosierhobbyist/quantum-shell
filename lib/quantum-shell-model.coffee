@@ -149,14 +149,14 @@ class QuantumShellModel
             line.classList.add 'text-success'
             line.classList.add 'quantum-shell-data'
             @output.appendChild line
-            @output.scrollTop = Infinity
+            @output.scrollTop = Number.MAX_VALUE
         @errorStream.on 'data', (chunk) =>
             line = document.createElement 'div'
             line.innerHTML = chunk.toString()
             line.classList.add 'text-error'
             line.classList.add 'quantum-shell-error'
             @output.appendChild line
-            @output.scrollTop = Infinity
+            @output.scrollTop = Number.MAX_VALUE
 
         #log any internal errors
         @dataStream.on 'error', (error) ->
