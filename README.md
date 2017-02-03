@@ -4,7 +4,7 @@ A command line interface built directly into Atom! This package is largely inspi
 ## Features
 
 ### Multiple Terminals, as of v-0.6.0!
-You can now run as many terminals as you would like side by side. Each will have its own unique history, aliases, environment and even underlying shell program! To run different shells next to one another, simply navigate to `Settings>Packages>quantum-shell>ShellName` and change the default. Now every *new* terminal you create will use that shell program until you destroy it. Even if you close Atom all the way down and restart it, you're settings will be preserved and you can continue to simultaneously run as many different shells as you would like!
+You can now run as many terminals as you would like side by side. Each will have its own unique history, aliases, environment and even underlying shell program! To run different shells next to one another, simply navigate to `Settings>Packages>quantum-shell>ShellName` and change the default. Now every *new* terminal you create will use that shell program until you destroy it. Even if you close Atom all the way down and restart it, your settings will be preserved and you can continue to simultaneously run as many different shells as you would like!
 
 ### Full `history` support just like you're used to in bash
 Just use the `up` and `down` arrow keys when the input field is focused to quickly navigate through your history, or use the `history` builtin to view a list of your past commands. A configuration option for limiting the number of commands to record can now be found under `Settings>Packages>quantum-shell>MaxHistory`. The default is 100.
